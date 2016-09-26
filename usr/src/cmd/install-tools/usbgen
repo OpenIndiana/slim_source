@@ -326,7 +326,7 @@ devs="$(lofiadm -la "${usb_file}")" || \
 rdevs="${devs/dsk/rdsk}"
 # for mount
 s0devs="${devs/p0/s0}"
-# for newfs and installgrub
+# for newfs and installboot
 rs0devs="${rdevs/p0/s0}"
 # for prtvtoc | fmthard
 rs2devs="${rdevs/p0/s2}"
@@ -368,7 +368,7 @@ print "Copying ISO contents to USB image..."
 #
 # install bootblocks
 #
-installgrub -mf "${usb_path}/boot/grub/stage1" "${usb_path}/boot/grub/stage2" \
+installboot -mf "${usb_path}/boot/pmbr" "${usb_path}/boot/gptzfsboot" \
 	"${rs0devs}"
 
 # If we get an error hereforth in menu.lst modifications, proceed with a warning

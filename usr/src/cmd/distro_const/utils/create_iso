@@ -105,7 +105,7 @@ rm -f "$DIST_ISO"
 PLATFORM=$(uname -m)
 
 if [[ "${PLATFORM}" == "i86pc" ]] ; then
-	$MKISOFS -o "$DIST_ISO" -b boot/grub/stage2_eltorito -c .catalog \
+	$MKISOFS -o "$DIST_ISO" -b boot/cdboot -c .catalog \
 	    -no-emul-boot -boot-load-size 4 -boot-info-table -N -l -R -U \
 	    -allow-multidot -no-iso-translate -cache-inodes -d -D -volset \
 	    "$VOLSETID" -V "$DISTRO_NAME" "$PKG_IMG_PATH"
