@@ -24,8 +24,7 @@
 
 include ../Makefile.master
 
-MANPAGES1M = distro_const.1m installadm.1m
-MANPAGES4 = dc_manifest.4
+MANPAGES1M = distro_const.1m
 
 FILEMODE = 0444
 

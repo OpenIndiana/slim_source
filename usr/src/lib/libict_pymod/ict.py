@@ -394,14 +394,10 @@ class ICT(object):
 
         # determine whether we are doing AI install or slim install
         self.livecd_install = False
-        self.auto_install = False
         self.text_install = False
         if os.access("/.livecd", os.R_OK):
             _dbg_msg('Determined to be doing Live CD install')
             self.livecd_install = True
-        elif os.access("/.autoinstall", os.R_OK):
-            _dbg_msg('Determined to be doing Automated Install')
-            self.auto_install = True
         elif os.access("/.textinstall", os.R_OK):
             _dbg_msg("Determined to be doing Text Install")
             self.text_install = True
@@ -415,7 +411,7 @@ class ICT(object):
             The code can be run on a live system but if we're not
             on a live system we should not support / for BASEDIR.
             '''
-            if self.livecd_install or self.auto_install or self.text_install:
+            if self.livecd_install or self.text_install:
                 err_str = 'Base directory cannot be root ' + \
                     '("/") during install'
                 prerror(err_str)
@@ -427,7 +423,7 @@ class ICT(object):
         the basedir here since that could be the mountpoint of a
         pool that we're creating the menu.lst file on.
         '''
-        if self.livecd_install or self.auto_install or self.text_install:
+        if self.livecd_install or self.text_install:
             self.prependdir = basedir
         else:
             self.prependdir = ""
@@ -479,7 +475,7 @@ class ICT(object):
         self.rootpool = rpa[0]
         _dbg_msg('Root pool name discovered: ' + self.rootpool)
 
-        if self.livecd_install or self.auto_install or self.text_install:
+        if self.livecd_install or self.text_install:
             #With the root pool pre-pended to /boot/grub/menu.lst
             self.grubmenu = '/' + self.rootpool + loc_grubmenu
             self.bootmenu_path_sparc = '/' + self.rootpool + '/boot'
@@ -1870,8 +1866,7 @@ class ICT(object):
         - return None if none is found
         '''
 
-        if (not self.livecd_install and not self.auto_install and
-            not self.text_install):
+        if (not self.livecd_install and not self.text_install):
             # Not going to have .image_info file
             return None
 
@@ -2555,7 +2550,6 @@ class ICT(object):
         info_msg('ict_test invoked')
 
         info_msg('optparm: ' + str(optparm))
-        info_msg('auto_install: ' + str(self.auto_install))
         info_msg('basedir: ' + str(self.basedir))
         info_msg('bootenvrc: ' + str(self.bootenvrc))
         info_msg('grubmenu: ' + str(self.grubmenu))

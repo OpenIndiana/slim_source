@@ -38,7 +38,6 @@ To setup a machine for building this source repository:
  3. Install required IPS packages:
 
 	developer/swig
-	system/boot/wanboot/internal
 	system/library/install/libinstzones
 	system/library/libdiskmgt/header-libdiskmgt
 	system/zones/internal

@@ -69,30 +69,4 @@ echo "Probing for device nodes ..." > /dev/msglog
 
 ls -lR /devices/* > /dev/null
 
-# 
-# Depending upon how we are booted, make sure that either the 'media' instance
-# or the 'net' instance of the filesystem/root service is enabled.
-#
-# Disabling 'media' instance has to be synchronous, otherwise there is
-# a space for race condition - 'media' service could enter online state
-# for a while - after filesystem/root-minimal finishes its job
-# and before request for 'disable' is processed by smf(5) framework.
-#
-if [ $ISA_INFO = "sparc" ]; then
-	# check if the wanboot device exists
-	BOOTFS_DISK="/devices/ramdisk-bootfs:a"
-	if [ -b "$BOOTFS_DISK" ]; then
-		#
-		# booting off of the net
-		/usr/sbin/svcadm enable svc:/system/filesystem/root:net
-		/usr/sbin/svcadm disable -s svc:/system/filesystem/root:media
-	fi
-else
-	MEDIA=`$PRTCONF -v | $SED -n '/install_media/{;n;p;}'`
-	if [ ! -z "$MEDIA" ]; then
-		/usr/sbin/svcadm enable svc:/system/filesystem/root:net
-		/usr/sbin/svcadm disable -s svc:/system/filesystem/root:media
-	fi
-fi
-
 exit $SMF_EXIT_OK

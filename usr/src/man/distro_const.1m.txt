@@ -185,9 +185,6 @@ ATTRIBUTES
 
 SEE ALSO
    
-    dc_manifest(4) at
-    /usr/share/man/man4/dc_manifest.4
-
     Oracle Solaris Distribution Constructor Guide
     at http://docs.sun.com
     

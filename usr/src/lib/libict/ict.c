@@ -740,12 +740,6 @@ ict_transfer_logs(char *src, char *dst, int transfer_mode)
 	int		ict_status = 0;
 	ict_status_t	return_status = ICT_SUCCESS;
 	int		i;
-	char		*ai_logfiles_array[] = {
-	    "/var/svc/log/application-auto-installer:default.log",
-	    "/var/svc/log/application-manifest-locator:default.log",
-	    "/var/adm/messages",
-	    "/tmp/ai.xml",
-	    NULL };
 	boolean_t	redirect = B_FALSE;
 
 	ict_log_print(CURRENT_ICT, _this_func_);
@@ -768,21 +762,7 @@ ict_transfer_logs(char *src, char *dst, int transfer_mode)
 	 *
 	 * Save standard log file now in case of CPIO transfer mode.
 	 */
-	if (transfer_mode == OM_IPS_TRANSFER) {
-		for (i = 0; ai_logfiles_array[i] != NULL; i++) {
-			(void) snprintf(cmd, sizeof (cmd), "/bin/cp %s %s%s",
-			    ai_logfiles_array[i], dst, LS_LOGFILE_DST_PATH);
-			redirect = B_TRUE;
-			ict_debug_print(ICT_DBGLVL_INFO, ICT_SAFE_SYSTEM_CMD,
-			    _this_func_, cmd);
-			ict_status = ict_safe_system(cmd, redirect);
-			if (ict_status != 0) {
-				ict_log_print(ICT_SAFE_SYSTEM_FAIL,
-				    _this_func_, cmd, ict_status);
-				return_status = set_error(ICT_TRANS_LOG_FAIL);
-			}
-		}
-	} else {
+	if (transfer_mode != OM_IPS_TRANSFER) {
 		if (ls_transfer(src, dst) != LS_E_SUCCESS) {
 			ict_log_print(TRANS_LOG_FAIL, _this_func_, src, dst);
 			return_status = set_error(ICT_TRANS_LOG_FAIL);

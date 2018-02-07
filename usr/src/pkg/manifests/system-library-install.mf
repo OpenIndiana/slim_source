@@ -42,9 +42,6 @@ file path=usr/lib/python2.7/vendor-packages/osol_install/errsvc.py
 file path=usr/lib/python2.7/vendor-packages/osol_install/errsvc.pyc
 file path=usr/lib/python2.7/vendor-packages/osol_install/liberrsvc.py
 file path=usr/lib/python2.7/vendor-packages/osol_install/liberrsvc.pyc
-file path=usr/snadm/lib/libspmicommon.so.1
 license cr_Sun license=cr_Sun
 link path=usr/lib/libaiscf.so target=libaiscf.so.1
 link path=usr/lib/liberrsvc.so target=liberrsvc.so.1
-link path=usr/snadm/lib/libspmicommon.so target=libspmicommon.so.1
-

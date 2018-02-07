@@ -82,7 +82,6 @@ file path=lib/svc/method/live-fs-root-minimal mode=0555
 file path=lib/svc/method/live-io-tracing mode=0555
 file path=lib/svc/method/live-sysidtool-system mode=0555
 file path=lib/svc/method/media-fs-root mode=0555
-file path=lib/svc/method/net-fs-root mode=0555
 file path=lib/svc/share/live_fs_include.sh mode=0444
 file path=sbin/listcd mode=0555
 file path=sbin/listusb mode=0555

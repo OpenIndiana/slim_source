@@ -33,7 +33,6 @@ SUBDIRS=	install_utils \
 		liblogsvc \
 		liblogsvc_pymod \
 		liborchestrator \
-		libspmicommon \
 		libtarget_pymod \
 		libtd \
 		libti \

@@ -30,7 +30,7 @@ SYSFSMANIFESTSRC=	live-root-fs.xml live-usr-fs.xml \
 A11YMANIFESTSRC=	live-a11y.xml
                 
 SVCMETHODSRC=	media-fs-root live-fs-root-minimal \
-		live-sysidtool-system  live-io-tracing live-a11y net-fs-root
+		live-sysidtool-system  live-io-tracing live-a11y
 
 SVCSHARESRC=	live_fs_include.sh
 

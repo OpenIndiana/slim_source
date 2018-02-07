@@ -54,11 +54,9 @@ dir path=usr/lib/python2.7/vendor-packages/osol_install
 dir path=usr/lib/python2.7/vendor-packages/osol_install/distro_const
 dir path=usr/share group=sys
 dir path=usr/share/distro_const 
-dir path=usr/share/distro_const/auto_install 
 dir path=usr/share/distro_const/loader
 dir path=usr/share/distro_const/slim_cd 
 dir path=usr/share/distro_const/text_install 
-dir path=usr/share/distro_const/vmc 
 dir path=usr/share/man
 dir path=usr/share/man/man1m 
 dir path=usr/share/man/man4 
@@ -81,12 +79,6 @@ file path=usr/lib/python2.7/vendor-packages/osol_install/distro_const/DefaultsMo
 file path=usr/lib/python2.7/vendor-packages/osol_install/distro_const/DefaultsModule.pyc mode=0444
 file path=usr/lib/python2.7/vendor-packages/osol_install/distro_const/ValidatorModule.py mode=0444
 file path=usr/lib/python2.7/vendor-packages/osol_install/distro_const/ValidatorModule.pyc mode=0444
-file path=usr/share/distro_const/auto_install/ai_boot_archive_configure mode=0555
-file path=usr/share/distro_const/auto_install/ai_live.xml mode=0444 group=sys
-file path=usr/share/distro_const/auto_install/ai_pre_boot_archive_pkg_image_mod mode=0555
-file path=usr/share/distro_const/auto_install/ai_publish_pkg mode=0555
-file path=usr/share/distro_const/auto_install/ai_sparc_image.xml mode=0444 group=sys
-file path=usr/share/distro_const/auto_install/ai_x86_image.xml mode=0444 group=sys
 file path=usr/share/distro_const/boot_archive_archive.py mode=0555
 file path=usr/share/distro_const/boot_archive_configure mode=0555
 file path=usr/share/distro_const/boot_archive_initialize.py mode=0555
@@ -121,17 +113,6 @@ file path=usr/share/distro_const/text_install/text_live.xml mode=0444 group=sys
 file path=usr/share/distro_const/text_install/text_mode_sparc.xml mode=0444 group=sys
 file path=usr/share/distro_const/text_install/text_mode_x86.xml mode=0444 group=sys
 file path=usr/share/distro_const/text_install/tm_pre_boot_archive_pkg_image_mod mode=0555
-file path=usr/share/distro_const/vmc/create_vm mode=0555
-file path=usr/share/distro_const/vmc/export_vm mode=0555
-file path=usr/share/distro_const/vmc/install_vm mode=0555
-file path=usr/share/distro_const/vmc/post_install_vm_config mode=0555
-file path=usr/share/distro_const/vmc/prepare_ai_image mode=0555
-file path=usr/share/distro_const/vmc/vmc_common mode=0444
-file path=usr/share/distro_const/vmc/vmc_image.xml mode=0444 group=sys
 file path=usr/share/man/man1m/distro_const.1m mode=0444
-file path=usr/share/man/man4/dc_manifest.4 mode=0444
 license cr_Sun license=cr_Sun
 link path=usr/share/distro_const/boot_archive_archive_32 target=boot_archive_archive.py
-link path=usr/share/distro_const/vmc/export_esx target=export_vm
-link path=usr/share/distro_const/vmc/export_ovf target=export_vm
-

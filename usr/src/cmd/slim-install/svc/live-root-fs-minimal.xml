@@ -59,13 +59,6 @@
 		<service_fmri value='svc:/system/filesystem/root:media' />
 	</dependent>
 
-	<dependent
-		name='net-fs-root'
-		grouping='require_all'
-		restart_on='none'>
-			<service_fmri value='svc:/system/filesystem/root:net' />
-	</dependent>
-
 	<exec_method
 		type='method'
 		name='start'

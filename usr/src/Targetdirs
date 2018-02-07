@@ -56,25 +56,19 @@ ROOT.BIN= \
 	/usr/include \
 	/usr/lib \
 	/usr/lib/install \
-	/usr/lib/installadm \
 	/usr/lib/locale \
 	/usr/lib/locale/C \
 	/usr/lib/locale/C/LC_MESSAGES \
 	/usr/lib/python2.7 \
 	/usr/lib/python2.7/vendor-packages \
 	/usr/lib/python2.7/vendor-packages/osol_install \
-	/usr/lib/python2.7/vendor-packages/osol_install/auto_install \
 	/usr/lib/python2.7/vendor-packages/osol_install/distro_const \
 	/usr/lib/python2.7/vendor-packages/osol_install/profile \
 	/usr/lib/python2.7/vendor-packages/osol_install/text_install \
 	/usr/sbin \
-	/usr/share/auto_install \
-	/usr/share/auto_install/sc_profiles \
 	/usr/share/distro_const \
-	/usr/share/distro_const/auto_install \
 	/usr/share/distro_const/slim_cd \
 	/usr/share/distro_const/text_install \
-	/usr/share/distro_const/vmc \
 	/usr/share/gui-install \
 	/usr/share/gui-install/help \
 	/usr/share/gui-install/help/C \
@@ -83,7 +77,6 @@ ROOT.BIN= \
 	/usr/share/lib \
 	/usr/share/lib/xml \
 	/usr/share/lib/xml/rng \
-	/usr/share/lib/xml/rng/auto_install \
 	/usr/share/man \
 	/usr/share/man/man1m \
 	/usr/share/man/man4 \
@@ -100,10 +93,6 @@ OTHERS= \
 	/opt/install-test/bin \
 	/usr/include/admin \
 	/usr/snadm/lib \
-	/var/installadm \
-	/var/installadm/ai-webserver \
-	/var/installadm/ai-webserver/AI_data \
-	/var/installadm/ai-webserver/AI_files
 
 # prepend the ROOT prefix
 

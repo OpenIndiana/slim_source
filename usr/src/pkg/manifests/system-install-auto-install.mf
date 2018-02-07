@@ -22,39 +22,7 @@
 # Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
 #
 
-set name=pkg.fmri value=pkg:/system/install/auto-install@$(PKGVERS)
-set name=pkg.summary value="Automated Installer Client Components"
-set name=pkg.description value="Automated Installer Client Components"
-set name=info.classification value="org.opensolaris.category.2008:System/Administration and Configuration"
+set name=pkg.fmri value=pkg:/system/install/auto-install@0.5.11,5.11-2017.0.1.0
+set name=pkg.obsolete value=true
 set name=variant.arch value=$(ARCH)
-set name=variant.opensolaris.zone value=global
-dir path=lib
-dir path=lib/svc
-dir path=lib/svc/manifest group=sys
-dir path=lib/svc/manifest/application group=sys
-dir path=lib/svc/method
-dir path=usr group=sys
-dir path=usr/bin
-dir path=usr/sbin
-dir path=usr/lib
-dir path=usr/lib/install
-dir path=usr/lib/python2.7
-dir path=usr/lib/python2.7/vendor-packages
-dir path=usr/lib/python2.7/vendor-packages/osol_install
-dir path=usr/lib/python2.7/vendor-packages/osol_install/auto_install
-dir path=usr/share group=sys
-dir path=usr/share/auto_install group=sys
-file path=lib/svc/method/auto-installer mode=0555
-file path=lib/svc/method/manifest-locator mode=0555
-file path=usr/bin/ai_get_manifest mode=0555
-file path=usr/bin/ai_sd mode=0555
-file path=usr/bin/auto-install mode=0555
-file path=usr/lib/install/sc_conv.ksh mode=0555
-file path=usr/lib/python2.7/vendor-packages/osol_install/auto_install/ai_parse_manifest.py mode=0444
-file path=usr/lib/python2.7/vendor-packages/osol_install/auto_install/ai_parse_manifest.pyc mode=0444
-file path=usr/sbin/get_manifest mode=0555
-file path=lib/svc/manifest/application/auto-installer.xml mode=0444 group=sys
-file path=lib/svc/manifest/application/manifest-locator.xml mode=0444 group=sys
-license cr_Sun license=cr_Sun
-link path=usr/lib/python2.7/vendor-packages/osol_install/auto_install/ai_get_manifest.py target=../../../../../bin/ai_get_manifest
-
+set name=variant.opensolaris.zone value=global value=nonglobal

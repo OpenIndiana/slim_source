@@ -69,26 +69,6 @@
 
 	</instance>
 
-	<instance name='net' enabled='false'>
-
-	<exec_method
-		type='method'
-		name='start'
-		exec='/lib/svc/method/net-fs-root'
-		timeout_seconds='0' />
-
-	<exec_method
-		type='method'
-		name='stop'
-		exec=':true'
-		timeout_seconds='0' />
-
-	<property_group name='startd' type='framework'>
-		<propval name='duration' type='astring' value='transient' />
-	</property_group>
-
-	</instance>
-
 	<stability value='Unstable' />
 
 	<template>

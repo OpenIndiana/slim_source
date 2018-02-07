@@ -38,11 +38,8 @@ ROOTMANSYSFIL	= $(ROOTMANSYS)/filesystem
 ROOTMANSYSSVC	= $(ROOTMANSYS)/svc
 ROOTMANSYSINS	= $(ROOTMANSYS)/install
 ROOTPROFATTR	= $(ROOT)/etc/security/prof_attr.d
-ROOTUSRLIBINSTALLADM	= $(ROOT)/usr/lib/installadm
 ROOTUSRLIBINSTALL	= $(ROOT)/usr/lib/install
 ROOTVARSADM	= $(ROOT)/var/sadm
-ROOTVARINSTADM	= $(ROOT)/var/installadm
-ROOTVARAIWEB	= $(ROOT)/var/installadm/ai-webserver
 ROOTETCSVCPROFILE	= $(ROOT)/etc/svc/profile
 
 # Derived installation rules

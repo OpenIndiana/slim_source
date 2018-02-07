@@ -78,13 +78,12 @@ if [ ! -d $PKG_IMG_PATH ] ; then
 	exit 1
 fi
 
-# Platform only needs to contain the kernel and boot_archive for x86 and
-# in the case of a sparc image, wanboot and the boot_archive.
+# Platform only needs to contain the kernel and boot_archive.
 initial_cwd=`pwd`
 if [ -d ${PKG_IMG_PATH}/platform ] ; then
     cd ${PKG_IMG_PATH}/platform
     if [ `$UNAME -p` == "sparc" ] ; then
-	$FIND . -type f -a ! -name wanboot -a ! -name boot_archive \
+	$FIND . -type f -a ! -name boot_archive \
 	    -a ! -name boot_archive.hash | $XARGS $RM -f
         cd ${PKG_IMG_PATH}
 	${LN} -s ../platform boot/platform

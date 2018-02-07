@@ -135,18 +135,6 @@ $(ROOTDC_TM):
 $(ROOTDC_TM)/%: %
 	$(INS.file)
 
-$(ROOTDC_AI):
-	$(INS.dir)
-
-$(ROOTDC_AI)/%: %
-	$(INS.file)
-
-$(ROOTDC_VMC):
-	$(INS.dir)
-
-$(ROOTDC_VMC)/%: %
-	$(INS.file)
-
 $(ROOTAUTOINST):
 	$(INS.dir)
 
@@ -165,16 +153,10 @@ $(ROOTUSRSBIN)/%: %
 $(ROOTUSRSHARETIHELPC)/%: %
 	$(INS.file)
 
-$(ROOTUSRLIBINSTALLADM)/%: %
-	$(INS.file)
-
 $(ROOTUSRLIBINSTALL)/%: %
 	$(INS.file)
 
 $(ROOTVARSADM)/%: %
-	$(INS.file)
-
-$(ROOTVARAIWEB)/%: %
 	$(INS.file)
 
 $(ROOTLIBSVCMETHOD)/%: %
