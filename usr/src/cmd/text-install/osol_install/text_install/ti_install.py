@@ -240,7 +240,7 @@ def create_root_pool(install_profile):
     if zpool_type is None:
         if len(install_profile.disks) > 1:
             logging.error("Root pool type is not set, "
-                "but several disks are used for installtion. "
+                "but several disks are used for installation. "
                 "Actually this shouldn't have happened.")
             raise ti_utils.InstallationError
     else:
