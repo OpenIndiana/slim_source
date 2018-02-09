@@ -233,8 +233,12 @@ def create_root_pool(install_profile):
        as libict doesn't know how to handle compex pool types
     '''
     rootpool_name = install_profile.disks[0].get_install_root_pool()
+    tgt_disk = install_profile.disks[0].to_tgt()
 
-    cmd = [ "/usr/sbin/zpool", "create", "-f", rootpool_name ]
+    if tgt_disk.use_whole:
+        cmd = [ "/usr/sbin/zpool", "create", "-Bf", rootpool_name ]
+    else:
+        cmd = [ "/usr/sbin/zpool", "create", "-f", rootpool_name ]
 
     zpool_type = install_profile.zpool_type
     if zpool_type is None:
@@ -249,8 +253,18 @@ def create_root_pool(install_profile):
     for disk in install_profile.disks:
         cmd.append(disk.get_install_device())
        
-    exec_cmd( cmd,
-             "creating root pool")
+    exec_cmd(cmd, "creating root pool")
+
+    # Clear ESP to be sure we do not have pool label there
+    if tgt_disk.use_whole:
+        for disk in install_profile.disks:
+            name = disk.get_install_device() + "s0"
+            try:
+                exec_cmd([ "/usr/sbin/zpool", "labelclear", "-f", name ],
+                         "clearing zpool label on " + name)
+            except ti_utils.InstallationError:
+                pass
+
     # Create boot/grub directory for holding menu.lst file
     exec_cmd(["/usr/bin/mkdir", "-p", "/%s/boot/grub" % (rootpool_name) ],
              "creating grub menu directory")
