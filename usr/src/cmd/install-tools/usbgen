@@ -303,13 +303,15 @@ mount -F hsfs "${isodev}" "${iso_path}" || \
 # Compute the size for the new USB image.
 # Use ISO file size + 20% to account for smaller block size on UFS
 # and the log. Round to nearest kbyte plus 512
-# plus 4MB for MBR+SMI label
+# plus 4MB for label
+# plus 34MB for system partition
+# plus 1MB for boot partition
 #
 get_filesize "usb_size" "${iso_file}"
 if (( usb_size == -1 )) ; then
 	error_handler "Failed to get size of file ${iso_file}"
 fi
-(( usb_size=((int( (usb_size * 1.2) / 1024.) * 1024.) + 512) + 4194304 ))
+(( usb_size=((int( (usb_size * 1.2) / 1024.) * 1024.) + 512) + 41943040 )) 
 
 #
 # Create and mount an empty new USB image.
@@ -324,40 +326,64 @@ devs="$(lofiadm -la "${usb_file}")" || \
 # Set rdevs by replacing dsk with rdsk in devs
 #
 rdevs="${devs/dsk/rdsk}"
-# for mount
+# for system partition
 s0devs="${devs/p0/s0}"
-# for newfs and installboot
-rs0devs="${rdevs/p0/s0}"
-# for prtvtoc | fmthard
+s2devs="${devs/p0/s2}"
+# for newfs and installboot and prtvtoc | fmthard
 rs2devs="${rdevs/p0/s2}"
+rs0devs="${rdevs/p0/s0}"
+pdev="${devs/p0/}"
 
 #
-# create Solaris2 partition
+# create GPT partitioning with system, boot and root
 #
-fdisk -B "${rdevs}"
+zpool create -B -o bootsize=34M usbgen-$$ $pdev
+zpool destroy usbgen-$$
+
 prtvtoc "${rs2devs}" | nawk '
 /^[^\*]/ { r = $1; for(n = 1; n <= NF; n++) vtoc[r,n] = $n }
 END {
-vtoc[0,1] = 0;
-vtoc[0,2] = 2;
-vtoc[0,3] = 00;
-vtoc[0,4] = vtoc[8,6] + 1;
-vtoc[0,5] = vtoc[2,6] - vtoc[8,6];
-vtoc[0,6] = vtoc[2,6];
+vtoc[1,1] = 1;
+vtoc[1,2] = 1;
+vtoc[1,3] = 00;
+vtoc[1,5] = 1024 * 1024 / 512;
+vtoc[1,6] = vtoc[1,4] + vtoc[1,5] - 1;
+
+vtoc[2,1] = 2;
+vtoc[2,2] = 2;
+vtoc[2,3] = 00;
+vtoc[2,4] = vtoc[1,6] + 1;
+vtoc[2,6] = vtoc[8,4] - 1;
+vtoc[2,5] = vtoc[2,6] - vtoc[2,4];
+
 printf("\t%d\t%d\t%02d\t%d\t%d\t%d\n",
-	vtoc[0,1], vtoc[0,2], vtoc[0,3], vtoc[0,4], vtoc[0,5], vtoc[0,6]);
+        vtoc[0,1], vtoc[0,2], vtoc[0,3], vtoc[0,4], vtoc[0,5], vtoc[0,6]);
 printf("\t%d\t%d\t%02d\t%d\t%d\t%d\n",
-	vtoc[2,1], vtoc[2,2], vtoc[2,3], vtoc[2,4], vtoc[2,5], vtoc[2,6]);
+        vtoc[1,1], vtoc[1,2], vtoc[1,3], vtoc[1,4], vtoc[1,5], vtoc[1,6]);
 printf("\t%d\t%d\t%02d\t%d\t%d\t%d\n",
-	vtoc[8,1], vtoc[8,2], vtoc[8,3], vtoc[8,4], vtoc[8,5], vtoc[8,6]);
+        vtoc[2,1], vtoc[2,2], vtoc[2,3], vtoc[2,4], vtoc[2,5], vtoc[2,6]);
+printf("\t%d\t%d\t%02d\t%d\t%d\t%d\n",
+        vtoc[8,1], vtoc[8,2], vtoc[8,3], vtoc[8,4], vtoc[8,5], vtoc[8,6]);
 }' | fmthard -s- "${rs2devs}"
 
-# newfs doesn't ask questions if stdin isn't a tty.
-newfs "${rs0devs}" </dev/null || \
-	error_handler "Failed to construct the UFS file system ${rs0devs}"
+mkfs -F pcfs -o b=system ${rs0devs} < /dev/null
 
-mount -o nologging "${s0devs}" "${usb_path}" || \
-	error_handler "Failed to mount construct the UFS file system ${rs0devs}"
+mount -F pcfs ${s0devs} ${usb_path}
+mkdir -p ${usb_path}/efi/boot
+if [ -f ${iso_path}/boot/bootia32.efi ] ; then
+  cp ${iso_path}/boot/bootia32.efi ${usb_path}/efi/boot/BOOTIA32.EFI
+  cp ${iso_path}/boot/bootx64.efi ${usb_path}/efi/boot/BOOTX64.EFI
+else
+  cp ${iso_path}/boot/boot1.efi ${usb_path}/efi/boot/BOOTX64.EFI
+fi
+umount ${usb_path}
+
+# newfs doesn't ask questions if stdin isn't a tty.
+newfs "${rs2devs}" </dev/null || \
+	error_handler "Failed to construct the UFS file system ${rs2devs}"
+
+mount -o nologging "${s2devs}" "${usb_path}" || \
+	error_handler "Failed to mount construct the UFS file system ${rs2devs}"
 
 #
 # Copy the contents of the ISO file to the new USB image.
@@ -369,7 +395,7 @@ print "Copying ISO contents to USB image..."
 # install bootblocks
 #
 installboot -mf "${usb_path}/boot/pmbr" "${usb_path}/boot/gptzfsboot" \
-	"${rs0devs}"
+	"${rs2devs}"
 
 # If we get an error hereforth in menu.lst modifications, proceed with a warning
 trap "" ERR INT

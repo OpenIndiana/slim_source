@@ -105,10 +105,33 @@ rm -f "$DIST_ISO"
 PLATFORM=$(uname -m)
 
 if [[ "${PLATFORM}" == "i86pc" ]] ; then
-	$MKISOFS -o "$DIST_ISO" -b boot/cdboot -c .catalog \
-	    -no-emul-boot -boot-load-size 4 -boot-info-table -N -l -R -U \
+	# create efi bootblock
+	/usr/bin/dd if=/dev/zero count=4400 bs=1024 \
+	    of="${PKG_IMG_PATH}/boot/efiboot.img" 2> /dev/null
+	LOFIDEV="`lofiadm -a ${PKG_IMG_PATH}/boot/efiboot.img`"
+	RLOFIDEV="/dev/rlofi/${LOFIDEV##/*/}"
+	/usr/sbin/mkfs -F pcfs -o nofdisk,size=8800 ${RLOFIDEV} < /dev/null
+	MDIR="`/bin/mktemp -d`"
+	/usr/sbin/mount -F pcfs ${LOFIDEV} ${MDIR}
+	mkdir -p ${MDIR}/efi/boot
+	if [ -f ${PKG_IMG_PATH}/boot/loader32.efi ] ; then
+	  cp ${PKG_IMG_PATH}/boot/loader32.efi ${MDIR}/efi/boot/bootia32.efi
+	  cp ${PKG_IMG_PATH}/boot/loader64.efi ${MDIR}/efi/boot/bootx64.efi
+	else
+	  cp ${PKG_IMG_PATH}/boot/loader.efi ${MDIR}/efi/boot/bootx64.efi
+	fi
+	/usr/sbin/umount ${MDIR}
+	rmdir ${MDIR}
+	lofiadm -d ${LOFIDEV}
+
+	# the option order is important!
+	$MKISOFS -o "$DIST_ISO" -c .catalog -N -l -R -U \
 	    -allow-multidot -no-iso-translate -cache-inodes -d -D -volset \
-	    "$VOLSETID" -V "$DISTRO_NAME" "$PKG_IMG_PATH"
+	    "$VOLSETID" -V "$DISTRO_NAME" \
+	    -eltorito-boot boot/cdboot -no-emul-boot -boot-info-table \
+	    -eltorito-alt-boot \
+	    -eltorito-boot boot/efiboot.img -no-emul-boot \
+	    "$PKG_IMG_PATH"
 else
 	# 
 	# First create the hsfs bootblock
