@@ -130,6 +130,7 @@ if [[ "${PLATFORM}" == "i86pc" ]] ; then
 	    "$VOLSETID" -V "$DISTRO_NAME" \
 	    -eltorito-boot boot/cdboot -no-emul-boot -boot-info-table \
 	    -eltorito-alt-boot \
+	    -eltorito-platform efi \
 	    -eltorito-boot boot/efiboot.img -no-emul-boot \
 	    "$PKG_IMG_PATH"
 else
