@@ -338,7 +338,7 @@ pdev="${devs/p0/}"
 # create GPT partitioning with system, boot and root
 #
 zpool create -B -o bootsize=34M usbgen-$$ $pdev
-zpool destroy usbgen-$$
+until zpool destroy usbgen-$$; do sleep 1; done
 
 prtvtoc "${rs2devs}" | nawk '
 /^[^\*]/ { r = $1; for(n = 1; n <= NF; n++) vtoc[r,n] = $n }
