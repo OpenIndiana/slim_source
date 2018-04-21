@@ -27,7 +27,6 @@
 #endif
 
 #include <sys/wait.h>
-#include <gnome.h>
 #include <gdk/gdkkeysyms.h>
 #include <glade/glade.h>
 #include "interface-globals.h"
@@ -99,12 +98,6 @@ on_logbutton_clicked(GtkWidget *widget,
 				    MainWindow.TextFileLocations[INSTALL_LOG],
 				    FALSE, FALSE, TRUE);
 				break;
-			case INSTALLATION_TYPE_INPLACE_UPGRADE:
-				show_locale_file_in_textview(
-				    MainWindow.FinishWindow.installationlogtextview,
-				    MainWindow.TextFileLocations[UPGRADE_LOG],
-				    FALSE, FALSE, TRUE);
-				break;
 		}
 		initialised = TRUE;
 	}
@@ -136,11 +129,6 @@ installation_log_init(void)
 			gtk_window_set_title(GTK_WINDOW(
 			    MainWindow.FinishWindow.installationlogdialog),
 			    _("Installation Log"));
-			break;
-		case INSTALLATION_TYPE_INPLACE_UPGRADE:
-			gtk_window_set_title(GTK_WINDOW(
-			    MainWindow.FinishWindow.installationlogdialog),
-			    _("Upgrade Log"));
 			break;
 	}
 	g_signal_connect(G_OBJECT(MainWindow.FinishWindow.installationlogclosebutton), "clicked",
@@ -174,14 +162,6 @@ finish_screen_set_contents(void)
 			    "OpenIndiana installation log for more information"));
 			buttonstr = g_strdup_printf(buttonmarkup,
 			    _("OpenIndiana installation log"));
-			break;
-
-		case INSTALLATION_TYPE_INPLACE_UPGRADE:
-			labelstr = g_strdup_printf(labelmarkup,
-			    _("OpenIndiana upgrade is complete. Review the "
-			    "OpenIndiana upgrade log for more information"));
-			buttonstr = g_strdup_printf(buttonmarkup,
-			    _("OpenIndiana upgrade log"));
 			break;
 	}
 	gtk_label_set_label(GTK_LABEL(

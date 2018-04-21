@@ -27,7 +27,6 @@
 #endif
 
 #include <gtk/gtk.h>
-#include <gnome.h>
 #include <glade/glade-build.h>
 #include <sys/nvpair.h>
 #include <ctype.h>
@@ -188,8 +187,6 @@ installation_window_set_contents(void)
 		case INSTALLATION_TYPE_INITIAL_INSTALL:
 			break;
 
-		case INSTALLATION_TYPE_INPLACE_UPGRADE:
-			break;
 	}
 
 	gdk_color_parse(WHITE_COLOR, &backcolour);
@@ -218,10 +215,6 @@ installation_window_set_contents(void)
 		case INSTALLATION_TYPE_INITIAL_INSTALL:
 			MainWindow.InstallationWindow.current_install_message =
 					g_strdup("Preparing for OpenIndiana installation");
-			break;
-		case INSTALLATION_TYPE_INPLACE_UPGRADE:
-			MainWindow.InstallationWindow.current_install_message =
-					g_strdup("Preparing for OpenIndiana upgrade");
 			break;
 	}
 
@@ -717,49 +710,6 @@ g_message("                             : percentage_done = %d\n",
 					break;
 			}
 			break;
-		case INSTALLATION_TYPE_INPLACE_UPGRADE:
-			switch (cb_data->curr_milestone) {
-				case OM_UPGRADE_CHECK :
-					MainWindow.InstallationWindow.current_install_message =
-						g_strdup(_("Performing upgrade check"));
-					/*
-					 * And software update takes 10%
-					 */
-					MainWindow.OverallPercentage =
-						(guint)(cb_data->percentage_done * 0.1);
-					break;
-
-				case OM_SOFTWARE_UPDATE :
-					MainWindow.InstallationWindow.current_install_message =
-						g_strdup(_("Updating OpenIndiana software"));
-					/*
-					 * And software update takes 89%
-					 */
-					MainWindow.OverallPercentage = 10 +
-						(guint)(cb_data->percentage_done * 0.89);
-					break;
-
-				case OM_POSTINSTAL_TASKS :
-					MainWindow.InstallationWindow.current_install_message =
-						g_strdup(_("Performing post-installation tasks"));
-					MainWindow.OverallPercentage = 99 +
-						(guint)(cb_data->percentage_done * 0.01);
-					break;
-
-				case -1: /* Indicates that update failed */
-					MainWindow.InstallationWindow.current_install_message = NULL;
-					g_warning("Update failed: %s",
-						g_strerror(cb_data->percentage_done));
-					InstallationProfile.installfailed = TRUE;
-					break;
-
-				default :
-					g_warning("Invalid update curr_milestone : %d : %s\n",
-						cb_data->curr_milestone,
-						lookup_milestone_type(cb_data->curr_milestone));
-					break;
-			}
-			break;
 	}
 }
 
@@ -965,30 +915,6 @@ installation_window_start_install(void)
 			}
 			break;
 
-		case INSTALLATION_TYPE_INPLACE_UPGRADE:
-			/* 1 : OM_ATTR_INSTALL_TYPE */
-			if ((err = nvlist_add_uint8(
-							install_choices,
-							OM_ATTR_INSTALL_TYPE,
-							OM_UPGRADE)) != 0) {
-				g_warning(_("Failed to add %s to pair list"),
-							"OM_ATTR_INSTALL_TYPE");
-				break;
-			}
-
-			/* 2 : OM_ATTR_UPGRADE_TARGET */
-			if (InstallationProfile.slicename) {
-				if ((err = nvlist_add_string(
-								install_choices,
-								OM_ATTR_UPGRADE_TARGET,
-								InstallationProfile.slicename)) != 0) {
-					g_warning(
-						_("Failed to add %s to pair list"),
-						"OM_ATTR_UPGRADE_TARGET");
-					break;
-				}
-			}
-			break;
 	}
 
 	if (err != 0) {

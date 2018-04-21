@@ -27,7 +27,6 @@
 #endif
 
 #include <gtk/gtk.h>
-#include <gnome.h>
 #include <glade/glade-build.h>
 #include <ctype.h>
 #include "installation-profile.h"
@@ -94,12 +93,6 @@ on_failurelogbutton_clicked(GtkWidget *widget,
 				    MainWindow.TextFileLocations[INSTALL_LOG],
 				    FALSE, FALSE, TRUE);
 				break;
-			case INSTALLATION_TYPE_INPLACE_UPGRADE:
-				show_locale_file_in_textview(
-				    MainWindow.FailureWindow.installlogtextview,
-				    MainWindow.TextFileLocations[UPGRADE_LOG],
-				    FALSE, FALSE, TRUE);
-				break;
 		}
 
 		initialised = TRUE;
@@ -131,11 +124,6 @@ installation_log_init(void)
 			gtk_window_set_title(GTK_WINDOW(
 			    MainWindow.FailureWindow.installlogdialog),
 			    _("Installation Log"));
-			break;
-		case INSTALLATION_TYPE_INPLACE_UPGRADE:
-			gtk_window_set_title(GTK_WINDOW(
-			    MainWindow.FailureWindow.installlogdialog),
-			    _("Upgrade Log"));
 			break;
 	}
 
@@ -180,14 +168,6 @@ failure_screen_set_contents(void)
 			    _("OpenIndiana installation did not complete normally."));
 			buttonstr = g_strdup_printf(buttonmarkup,
 			    _("OpenIndiana installation log"));
-			break;
-
-		case INSTALLATION_TYPE_INPLACE_UPGRADE:
-			labelstr = g_strdup_printf(labelmarkup,
-			    _("OpenIndiana Developer Preview 2 upgrade did not complete normally. "
-			    "The system has been restored to its previous state."));
-			buttonstr = g_strdup_printf(buttonmarkup,
-			    _("OpenIndiana upgrade log"));
 			break;
 	}
 	gtk_label_set_label(GTK_LABEL(

@@ -34,7 +34,6 @@ extern "C" {
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <gnome.h>
 
 #define	MAXBUFFER 12800
 

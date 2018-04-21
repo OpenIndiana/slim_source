@@ -27,7 +27,6 @@
 #endif
 
 #include <sys/wait.h>
-#include <gnome.h>
 #include <libbe.h>
 
 #include "installation-profile.h"
@@ -175,12 +174,6 @@ prompt_quit()
 							_("Do you want to quit this installation ?"),
 							NULL);
 			break;
-		case INSTALLATION_TYPE_INPLACE_UPGRADE:
-			ret_val = gui_install_prompt_dialog(TRUE, FALSE, FALSE,
-							GTK_MESSAGE_WARNING,
-							_("Do you want to quit this installation ?"),
-							NULL);
-			break;
 	}
 	return (ret_val);
 }
@@ -307,14 +300,6 @@ on_nextbutton_clicked(GtkButton *button,
 						MainWindow.InstallationDiskWindow.diskselectiontoplevel);
 					installationdisk_screen_set_default_focus( FALSE );
 					break;
-				case INSTALLATION_TYPE_INPLACE_UPGRADE:
-					if (MainWindow.MileStoneComplete[OM_UPGRADE_TARGET_DISCOVERY]
-							== FALSE)
-						gtk_widget_set_sensitive(MainWindow.nextbutton, FALSE);
-					gtk_widget_hide(
-						MainWindow.InstallationDiskWindow.diskselectiontoplevel);
-					show_upgrade_screen(TRUE);
-					break;
 			}
 
 			gtk_widget_set_sensitive(MainWindow.backbutton, TRUE);
@@ -421,14 +406,6 @@ on_nextbutton_clicked(GtkButton *button,
 					gtk_label_set_label(GTK_LABEL(MainWindow.userlabel),
 						MainWindow.InactiveStageTitles[USER_SCREEN]);
 					break;
-				case INSTALLATION_TYPE_INPLACE_UPGRADE:
-					show_upgrade_screen(FALSE);
-					gtk_widget_show(MainWindow.upgradebutton);
-					gtk_widget_set_sensitive(MainWindow.upgradebutton, TRUE);
-					gtk_widget_grab_default(MainWindow.upgradebutton);
-					gtk_label_set_label(GTK_LABEL(MainWindow.disklabel),
-						MainWindow.InactiveStageTitles[DISK_SCREEN]);
-					break;
 			}
 			confirmation_screen_set_contents();
 			gtk_widget_show(
@@ -467,10 +444,6 @@ on_nextbutton_clicked(GtkButton *button,
 			switch (InstallationProfile.installationtype) {
 				case INSTALLATION_TYPE_INITIAL_INSTALL:
 					gtk_widget_set_sensitive(MainWindow.installbutton, FALSE);
-					break;
-
-				case INSTALLATION_TYPE_INPLACE_UPGRADE:
-					gtk_widget_set_sensitive(MainWindow.upgradebutton, FALSE);
 					break;
 			}
 
@@ -511,9 +484,6 @@ on_nextbutton_clicked(GtkButton *button,
 				case INSTALLATION_TYPE_INITIAL_INSTALL:
 					gtk_widget_set_sensitive(MainWindow.installbutton, FALSE);
 					break;
-				case INSTALLATION_TYPE_INPLACE_UPGRADE:
-					gtk_widget_set_sensitive(MainWindow.upgradebutton, FALSE);
-					break;
 			}
 			gtk_widget_grab_default(MainWindow.quitbutton);
 
@@ -538,9 +508,6 @@ on_nextbutton_clicked(GtkButton *button,
 			switch (InstallationProfile.installationtype) {
 				case INSTALLATION_TYPE_INITIAL_INSTALL:
 					gtk_widget_hide(MainWindow.installbutton);
-					break;
-				case INSTALLATION_TYPE_INPLACE_UPGRADE:
-					gtk_widget_hide(MainWindow.upgradebutton);
 					break;
 			}
 
@@ -593,11 +560,6 @@ on_backbutton_clicked(GtkButton *button,
 					gtk_widget_hide(MainWindow.installbutton);
 					InstallCurrScreen--;
 					break;
-				case INSTALLATION_TYPE_INPLACE_UPGRADE:
-					/* Short circuit back to the DISK_SCREEN */
-					gtk_widget_hide(MainWindow.upgradebutton);
-					InstallCurrScreen = DISK_SCREEN;
-					break;
 			}
 			gtk_widget_show(MainWindow.nextbutton);
 			gtk_widget_grab_default(MainWindow.nextbutton);
@@ -635,9 +597,6 @@ on_backbutton_clicked(GtkButton *button,
 					gtk_widget_hide(
 						MainWindow.InstallationDiskWindow.diskselectiontoplevel);
 					break;
-				case INSTALLATION_TYPE_INPLACE_UPGRADE:
-					show_upgrade_screen(FALSE);
-					break;
 			}
 			gtk_label_set_label(GTK_LABEL(MainWindow.disklabel),
 				MainWindow.InactiveStageTitles[DISK_SCREEN]);
@@ -664,19 +623,6 @@ on_backbutton_clicked(GtkButton *button,
 					gtk_widget_show(
 						MainWindow.InstallationDiskWindow.diskselectiontoplevel);
 					installationdisk_screen_set_default_focus( TRUE );
-					break;
-				case INSTALLATION_TYPE_INPLACE_UPGRADE:
-					gtk_widget_hide(
-						MainWindow.ConfirmationWindow.confirmationtoplevel);
-					gtk_widget_hide(MainWindow.upgradebutton);
-					title = g_strdup_printf(InactiveStageTitleMarkup,
-								gtk_label_get_text(GTK_LABEL(
-									MainWindow.installationlabel)));
-					gtk_label_set_label(GTK_LABEL(MainWindow.installationlabel),
-							title);
-					gtk_widget_show(MainWindow.nextbutton);
-					show_upgrade_screen(TRUE);
-					g_free(title);
 					break;
 			}
 			gtk_widget_set_sensitive(MainWindow.backbutton, TRUE);
@@ -929,9 +875,6 @@ on_licensecheckbutton_toggled(GtkToggleButton *togglebutton,
 	switch (InstallationProfile.installationtype) {
 		case INSTALLATION_TYPE_INITIAL_INSTALL:
 			button = MainWindow.installbutton;
-			break;
-		case INSTALLATION_TYPE_INPLACE_UPGRADE:
-			button = MainWindow.upgradebutton;
 			break;
 	}
 

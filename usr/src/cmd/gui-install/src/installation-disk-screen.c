@@ -25,7 +25,6 @@
 #include <ctype.h>
 #include <math.h>
 
-#include <gnome.h>
 #include "orchestrator-wrappers.h"
 #include "callbacks.h"
 #include "interface-globals.h"

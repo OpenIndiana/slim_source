@@ -47,8 +47,9 @@ on_releasenotesbutton_clicked(GtkWidget *widget,
 	GError *error = NULL;
 	gboolean result;
 
-	result = gnome_url_show_on_screen(RELEASENOTESURL,
-		gtk_widget_get_screen(widget),
+	result = gtk_show_uri(gtk_widget_get_screen(widget),
+		RELEASENOTESURL,
+		GDK_CURRENT_TIME,
 		&error);
 	if (result != TRUE) {
 		gui_install_prompt_dialog(

@@ -28,7 +28,6 @@
 #endif
 
 #include <glib/gstdio.h>
-#include <gnome.h>
 
 #include "installation-profile.h"
 #include "interface-globals.h"
@@ -297,10 +296,6 @@ help_dialog_show(InstallScreen currScreen, gboolean bringToFront)
 					tmpFileName =
 								MainWindow.TextFileLocations[HELP_INSTALL_DISK];
 					break;
-				case INSTALLATION_TYPE_INPLACE_UPGRADE:
-					tmpFileName =
-								MainWindow.TextFileLocations[HELP_UPGRADE_DISK];
-					break;
 			}
 			break;
 		case TIMEZONE_SCREEN :
@@ -318,10 +313,6 @@ help_dialog_show(InstallScreen currScreen, gboolean bringToFront)
 					tmpFileName =
 						MainWindow.TextFileLocations[HELP_INSTALL_CONFIRMATION];
 					break;
-				case INSTALLATION_TYPE_INPLACE_UPGRADE:
-					tmpFileName =
-						MainWindow.TextFileLocations[HELP_UPGRADE_CONFIRMATION];
-					break;
 			}
 			break;
 		case INSTALLATION_SCREEN :
@@ -330,10 +321,6 @@ help_dialog_show(InstallScreen currScreen, gboolean bringToFront)
 					tmpFileName =
 							MainWindow.TextFileLocations[HELP_INSTALL_PROGRESS];
 					break;
-				case INSTALLATION_TYPE_INPLACE_UPGRADE:
-					tmpFileName =
-							MainWindow.TextFileLocations[HELP_UPGRADE_PROGRESS];
-					break;
 			}
 			break;
 		case FAILURE_SCREEN :
@@ -341,10 +328,6 @@ help_dialog_show(InstallScreen currScreen, gboolean bringToFront)
 				case INSTALLATION_TYPE_INITIAL_INSTALL:
 					tmpFileName =
 							MainWindow.TextFileLocations[HELP_INSTALL_FAILURE];
-					break;
-				case INSTALLATION_TYPE_INPLACE_UPGRADE:
-					tmpFileName =
-							MainWindow.TextFileLocations[HELP_UPGRADE_FAILURE];
 					break;
 			}
 			break;

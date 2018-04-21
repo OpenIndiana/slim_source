@@ -31,7 +31,6 @@
 #include <locale.h>
 
 #include <gtk/gtk.h>
-#include <gnome.h>
 #include <glade/glade.h>
 
 #include "callbacks.h"
@@ -539,7 +538,7 @@ main(int argc, char *argv[])
 		{ NULL }
 	};
 	GOptionContext *option_context;
-	GnomeProgram *installer_app;
+	GError *error;
 
 	option_context = g_option_context_new("installer-app");
 #ifdef ENABLE_NLS
@@ -553,10 +552,7 @@ main(int argc, char *argv[])
 		option_context,
 		option_entries,
 		GETTEXT_PACKAGE);
-	installer_app = gnome_program_init(PACKAGE, VERSION, LIBGNOMEUI_MODULE,
-				argc, argv,
-				GNOME_PARAM_GOPTION_CONTEXT, option_context,
-				GNOME_PARAM_NONE);
+	g_option_context_parse(option_context, &argc, &argv, &error);
 
 	if (getuid() != 0) {
 		g_warning("The OpenIndiana installer must be run as root. Quitting.");

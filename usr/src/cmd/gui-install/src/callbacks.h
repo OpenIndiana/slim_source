@@ -35,7 +35,6 @@ extern "C" {
 #include <config.h>
 #endif
 #include <orchestrator_api.h>
-#include <gnome.h>
 void 		target_discovery_callback(om_callback_info_t *cb_data,
 				uintptr_t app_data);
 

@@ -37,8 +37,7 @@ extern "C" {
 #include <orchestrator-wrappers.h>
 
 typedef enum {
-	INSTALLATION_TYPE_INITIAL_INSTALL,
-	INSTALLATION_TYPE_INPLACE_UPGRADE
+	INSTALLATION_TYPE_INITIAL_INSTALL
 	/* Extend in future for snap upgrade, live upgrade etc. */
 } InstallationType;
 

@@ -27,7 +27,6 @@
 #endif
 
 #include <gtk/gtk.h>
-#include <gnome.h>
 #include <ctype.h>
 #include <pwd.h>
 #include <netdb.h>

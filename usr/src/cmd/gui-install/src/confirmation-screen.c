@@ -27,7 +27,6 @@
 #endif
 
 #include <gtk/gtk.h>
-#include <gnome.h>
 #include <glade/glade-build.h>
 #include "installation-profile.h"
 #include "interface-globals.h"
@@ -493,77 +492,6 @@ confirmation_screen_set_contents(void)
 			}
 			break;
 
-		case INSTALLATION_TYPE_INPLACE_UPGRADE:
-
-			/* Disk Information */
-			gtk_widget_show(MainWindow.ConfirmationWindow.diskvbox);
-
-			diskSize = InstallationProfile.disksize;
-
-			if (InstallationProfile.releasename != NULL) {
-				if (InstallationProfile.diskname != NULL) {
-					tmpStr =
-						g_strdup_printf(
-							_("%.1f GB disk (%s) with %s"),
-							diskSize,
-							InstallationProfile.diskname,
-							InstallationProfile.releasename);
-				} else {
-					tmpStr =
-						g_strdup_printf(
-							_("%.1f GB disk with %s"),
-							diskSize,
-							InstallationProfile.releasename);
-				}
-			} else {
-				if (InstallationProfile.diskname != NULL) {
-					tmpStr =
-						g_strdup_printf(
-							_("%.1f GB disk (%s)"),
-							diskSize,
-							InstallationProfile.diskname);
-				} else {
-					tmpStr =
-						g_strdup_printf(
-							_("%.1f GB disk"),
-							diskSize);
-				}
-			}
-
-			add_detail_hbox(
-				MainWindow.ConfirmationWindow.diskvbox,
-				FALSE, FALSE, tmpStr, NULL);
-			g_free(tmpStr);
-
-			/* Software Information */
-			gtk_widget_show(
-				MainWindow.ConfirmationWindow.softwarevbox);
-
-			add_detail_hbox(
-				MainWindow.ConfirmationWindow.softwarevbox,
-				FALSE, FALSE,
-				_("OpenIndiana"),
-				NULL);
-
-			add_detail_hbox(
-				MainWindow.ConfirmationWindow.softwarevbox,
-				FALSE, FALSE,
-				_("Desktop (GNOME)"),
-				NULL);
-
-			/* Timezone Information */
-			gtk_widget_hide(
-				MainWindow.ConfirmationWindow.timezonevbox);
-
-			/* Languages Information */
-			gtk_widget_hide(
-				MainWindow.ConfirmationWindow.languagesvbox);
-
-			/* Account Information Always hidden on an upgrade */
-			gtk_widget_hide(
-				MainWindow.ConfirmationWindow.accountvbox);
-
-			break;
 	}
 #ifdef POST_PREVIEW_RELEASE
 	gtk_toggle_button_set_active(
