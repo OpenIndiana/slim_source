@@ -45,30 +45,28 @@ then
 	cd /.cdrom/jack
 	find . -print | cpio -pmud /jack
 	
-	if [ -x /usr/bin/mate-session ]; then
-		# Switch to Mate by default if it's present
-		printf '[Desktop]\n' > /jack/.dmrc
-		printf 'Session=mate\n' >> /jack/.dmrc
-		
-		# Set language
-		RC_LANG="en_US.UTF-8"
-		if [ -f /etc/sysconfig/language ]; then
-			. /etc/sysconfig/language
-		fi
-		printf 'Language=%s\n' "${RC_LANG}" >> /jack/.dmrc
-		
-		# Set keyboard layout
-		layout=${RC_LANG:0:2}
-		if [ "$layout" != "en" -a "$layout" != "C" ]; then
-			DCONF_CONFIG=/etc/dconf/db/local.d/98-xkb-settings
-		
-			printf "[org/mate/desktop/peripherals/keyboard/kbd]\n" > $DCONF_CONFIG
-			printf "layouts=['us','%s']\n" "$layout" >> $DCONF_CONFIG
-			printf "options=['grp\\\tgrp:alt_shift_toggle']\n" >> $DCONF_CONFIG
-			printf "model='pc105'\n" >> $DCONF_CONFIG
-		
-			dconf update
-		fi
+	# Construct user .dmrc file
+	printf '[Desktop]\n' > /jack/.dmrc
+	printf 'Session=mate\n' >> /jack/.dmrc
+	
+	# Set language
+	RC_LANG="en_US.UTF-8"
+	if [ -f /etc/sysconfig/language ]; then
+		. /etc/sysconfig/language
+	fi
+	printf 'Language=%s\n' "${RC_LANG}" >> /jack/.dmrc
+	
+	# Set keyboard layout
+	layout=${RC_LANG:0:2}
+	if [ "$layout" != "en" -a "$layout" != "C" ]; then
+		DCONF_CONFIG=/etc/dconf/db/local.d/98-xkb-settings
+	
+		printf "[org/mate/desktop/peripherals/keyboard/kbd]\n" > $DCONF_CONFIG
+		printf "layouts=['us','%s']\n" "$layout" >> $DCONF_CONFIG
+		printf "options=['grp\\\tgrp:alt_shift_toggle']\n" >> $DCONF_CONFIG
+		printf "model='pc105'\n" >> $DCONF_CONFIG
+	
+		dconf update
 	fi
 
 	#

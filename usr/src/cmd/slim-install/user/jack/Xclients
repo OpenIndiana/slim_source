@@ -23,9 +23,4 @@
 # Use is subject to license terms.
 #
 # For automatic login, we just invoke the default Gnome desktop
-if [ -x /usr/bin/mate-session ]; then
-  exec /usr/bin/dtstart mate ;
-else 
-  exec /usr/bin/dtstart gnome ;
-fi
-
+exec /usr/bin/dtstart mate
