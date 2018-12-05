@@ -370,11 +370,18 @@ mkfs -F pcfs -o b=system ${rs0devs} < /dev/null
 
 mount -F pcfs ${s0devs} ${usb_path}
 mkdir -p ${usb_path}/efi/boot
-if [ -f ${iso_path}/boot/bootia32.efi ] ; then
+# boot1.efi is gone some time ago, but keep the check for some time
+# boot*.efi is gone as of Dec 2018, keep the check for some time
+if [ -f ${iso_path}/boot/boot1.efi ] ; then
+  cp ${iso_path}/boot/boot1.efi ${usb_path}/efi/boot/BOOTX64.EFI
+elif [ -f ${iso_path}/boot/bootia32.efi ] ; then
   cp ${iso_path}/boot/bootia32.efi ${usb_path}/efi/boot/BOOTIA32.EFI
   cp ${iso_path}/boot/bootx64.efi ${usb_path}/efi/boot/BOOTX64.EFI
 else
-  cp ${iso_path}/boot/boot1.efi ${usb_path}/efi/boot/BOOTX64.EFI
+  # this is current setup, but with earlier code, the loader can not
+  # boot on its own (except in pxe boot).
+  cp ${iso_path}/boot/loader64.efi ${usb_path}/efi/boot/BOOTX64.EFI
+  cp ${iso_path}/boot/loader32.efi ${usb_path}/efi/boot/BOOTIA32.EFI
 fi
 umount ${usb_path}
 
