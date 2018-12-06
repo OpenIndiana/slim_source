@@ -320,6 +320,10 @@
 			<base_include type="file">usr/sbin/nwamcfg</base_include>
 			<base_include type="file">usr/sbin/nwamadm</base_include>
 
+			<!-- libraries needed by /usr/bin/bash -->
+			<base_include type="file">usr/lib/64/libncurses.so.5</base_include>
+			<base_include type="file">usr/lib/64/libncurses.so.5.9</base_include>
+
 			<!-- libraries needed by /usr/sbin/prtconf -->
 			<base_include type="file">usr/lib/libsmbios.so.1</base_include>
 
