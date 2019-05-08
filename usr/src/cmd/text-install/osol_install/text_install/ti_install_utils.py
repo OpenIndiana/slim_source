@@ -189,7 +189,7 @@ class SwapDump:
             free_space = available_size - installation_size
             self.swap_size = self.__calc_size(((free_space * MIN_SWAP_SIZE) / 
                                        (MIN_SWAP_SIZE + MIN_DUMP_SIZE)),
-                                       MIN_SWAP_SIZE, MAX_SWAP_SIZE)
+                                       MIN_SWAP_SIZE, MAX_SWAP_SIZE, 1)
             self.dump_size = self.__calc_size(((free_space * MIN_DUMP_SIZE) /
                                        (MIN_SWAP_SIZE + MIN_DUMP_SIZE)),
                                        MIN_DUMP_SIZE, MAX_DUMP_SIZE)
@@ -207,7 +207,7 @@ class SwapDump:
 
         return(self.swap_type, self.swap_size, self.dump_type, self.dump_size)
 
-    def __calc_size(self, available_space, min_size, max_size):
+    def __calc_size(self, available_space, min_size, max_size, is_swap=0):
         '''Calculates size of swap or dump in MB based on amount of
            physical memory available.
 
@@ -216,15 +216,23 @@ class SwapDump:
            is more than the max size to be used, the swap/dump size will
            be trimmed down to the maximum size to be used for swap/dump
 
+           Because Firefox requires a lot of memory, and thus a lot of reserved
+           swap, swap size is counted differently to dump size.
+
            Args:
                available_swap_space: space that can be dedicated to swap in MB
-	       min_size: minimum size to use
-	       max_size: maximum size to use
+               min_size: minimum size to use
+               max_size: maximum size to use
+               is_swap: swap size is being calculated
 
            Returns:
                size of swap in MB
 
         '''
+
+        ratio = 2
+        if is_swap:
+            ratio = 0.5
 
         if available_space == 0:
             return (0)
@@ -232,7 +240,7 @@ class SwapDump:
         if (self.mem_size < min_size):
             size = min_size
         else:
-            size = self.mem_size / 2
+            size = int(self.mem_size / ratio)
             if (size >  max_size):
                 size = max_size
 
