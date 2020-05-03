@@ -145,6 +145,7 @@ typedef enum idm_errno_t {
 /* function prototypes */
 idm_errno_t idm_fdisk_create_part_table(nvlist_t *attrs);
 idm_errno_t idm_fdisk_whole_disk(char *disk_name);
+idm_errno_t idm_create_disk_label(nvlist_t *attrs);
 idm_errno_t idm_create_vtoc(nvlist_t *attrs);
 idm_errno_t idm_unmount_all(char *disk_name);
 idm_errno_t idm_release_swap(char *disk_name);

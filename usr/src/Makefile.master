@@ -181,24 +181,11 @@ COMPILE.c=	$(CC) $(CFLAGS) $(CPPFLAGS) -c
 # of runtime search paths that can cause local and SWAN paths to be
 # included in libraries and executables which would be inappropriate
 # for use outside of SWAN (that is, customer sites)
-CFLAGS:sh =if [ "`uname -p`" = "sparc" ]; then \
-		echo "-xc99=%none -Wa,-xcg92" ; \
-          else  echo ""; \
-          fi
-CCFLAGS:sh =if [ "`uname -p`" = "sparc" ]; then \
-		echo "-Qoption fbe -xcg92" ; \
-          else  echo ""; \
-          fi
 
-$(RELEASE_BUILD)CFLAGS:sh =if [ "`uname -p`" = "sparc" ]; then \
-		echo "-xc99=%none -O -Wa,-xcg92" ; \
-          else  echo "-O"; \
-          fi
- 
-$(RELEASE_BUILD)CCFLAGS:sh =if [ "`uname -p`" = "sparc" ]; then \
-		echo "-O -Qoption fbe -xcg92" ; \
-          else  echo "-O"; \
-          fi
+CFLAGS=
+CCFLAGS=
+$(RELEASE_BUILD)CFLAGS=		-O
+$(RELEASE_BUILD)CCFLAGS=	-O
 
 BITS = 64
 CFLAGS += -m$(BITS)
