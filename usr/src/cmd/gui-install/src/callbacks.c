@@ -54,6 +54,9 @@
 
 InstallScreen InstallCurrScreen = WELCOME_SCREEN;
 
+// From installation-profile.h
+InstallationProfileType InstallationProfile;
+
 /* Forward declaration */
 static gboolean
 would_you_like_to_install_instead(void);

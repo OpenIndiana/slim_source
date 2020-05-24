@@ -94,10 +94,10 @@ extern "C" {
 #define	NUMMILESTONES OM_POSTINSTAL_TASKS+1
 
 /* Pango markup for the screen title and stage labels */
-gchar *ScreenTitleMarkup;
-gchar *ScreenSubTitleMarkup;
-gchar *ActiveStageTitleMarkup;
-gchar *InactiveStageTitleMarkup;
+extern gchar *ScreenTitleMarkup;
+extern gchar *ScreenSubTitleMarkup;
+extern gchar *ActiveStageTitleMarkup;
+extern gchar *InactiveStageTitleMarkup;
 
 typedef struct _MainWindowXML {
 	GladeXML *mainwindowxml;
@@ -167,7 +167,7 @@ typedef struct _MainWindowXML {
 	GtkWidget *helptextview;
 } MainWindowXML;
 
-MainWindowXML MainWindow;
+extern MainWindowXML MainWindow;
 
 typedef enum {
 	WELCOME_SCREEN = 0,

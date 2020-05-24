@@ -51,6 +51,16 @@
 
 gboolean waitforsignal = FALSE;
 
+MainWindowXML MainWindow;
+
+/* Pango markup for the screen title and stage labels */
+gchar *ScreenTitleMarkup = NULL;
+gchar *ScreenSubTitleMarkup = NULL;
+gchar *ActiveStageTitleMarkup = NULL;
+gchar *InactiveStageTitleMarkup = NULL;
+
+om_handle_t      omhandle;
+
 static void
 catch_sigusr(int sig_num)
 {

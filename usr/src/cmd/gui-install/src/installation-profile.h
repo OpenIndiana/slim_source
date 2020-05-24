@@ -73,7 +73,7 @@ typedef struct _InstallationProfileType {
 	gboolean installfailed;
 } InstallationProfileType;
 
-InstallationProfileType InstallationProfile;
+extern InstallationProfileType InstallationProfile;
 
 #ifdef __cplusplus
 }

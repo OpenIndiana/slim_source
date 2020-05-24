@@ -39,7 +39,7 @@ extern "C" {
 #define	GBPERTB	1024
 
 /* Global target discovery handle */
-om_handle_t	omhandle;
+extern om_handle_t	omhandle;
 
 /* Function declarations */
 om_handle_t
