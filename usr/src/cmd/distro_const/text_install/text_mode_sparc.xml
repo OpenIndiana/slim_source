@@ -178,7 +178,7 @@
 		-->
 		<pkg_repo_default_authority>
 			<main
-				url="https://pkg.openindiana.aurora-opencloud.org/oi-sparc"
+				url="https://pkg.openindiana.aurora-opencloud.org/oi-sparc/"
 				authname="openindiana.org"/>
 			<!--
 			     If you want to use one or more  mirrors that are
@@ -233,9 +233,8 @@
 		    Uncomment before using.
 		<post_install_repo_addl_authority>
 			<main
-				url=""
-				authname=""/>
-			<mirror url="" />
+				url="http://your.build.host:10000/"
+				authname="userland"/>
 		</post_install_repo_addl_authority>
 		-->
 		<!--
@@ -253,8 +252,14 @@
 			-->
 			<pkg name="pkg:/entire"/>
 			<pkg name="pkg:/server_install"/>
+			<pkg name="pkg:/system/kernel/cpu/sun4v"/>
 			<pkg name="pkg:/system/install/text-install"/>
 			<pkg name="pkg:/system/install/media/internal"/>
+			<pkg name="pkg:/service/key-management/sun-fire-15000"/>
+			<pkg name="pkg:/system/domain-configuration/sparc-enterprise"/>
+			<pkg name="pkg:/system/kernel/dynamic-reconfiguration/sun-fire-880"/>
+			<pkg name="pkg:/system/kernel/dynamic-reconfiguration/sun-fire-15000"/>
+			<pkg name="pkg:/system/domain-service-processor-protocol/sparc-enterprise"/>
 		</packages>
 <!--
      Items below this line are rarely configured
@@ -293,8 +298,8 @@
 			<base_include type="file">usr/bin/bash</base_include>
 			<base_include type="file">usr/bin/cat</base_include>
 			<base_include type="file">usr/bin/cd</base_include>
-			<base_include type="file">usr/bin/coreadm</base_include>
 			<base_include type="file">usr/bin/cp</base_include>
+			<base_include type="file">usr/bin/coreadm</base_include>
 			<base_include type="file">usr/bin/cut</base_include>
 			<base_include type="file">usr/bin/echo</base_include>
 			<base_include type="file">usr/bin/expr</base_include>
@@ -325,33 +330,6 @@
 			<base_include type="file">usr/bin/vi</base_include>
 			<base_include type="file">usr/bin/which</base_include>
 			<base_include type="file">usr/has/bin/vi</base_include>
-			<base_include type="file">usr/sbin/chroot</base_include>
-			<base_include type="file">usr/sbin/devfsadm</base_include>
-			<base_include type="file">usr/sbin/df</base_include>
-			<base_include type="file">usr/sbin/format</base_include>
-			<base_include type="file">usr/sbin/hostconfig</base_include>
-			<base_include type="file">usr/sbin/lofiadm</base_include>
-			<base_include type="file">usr/sbin/modload</base_include>
-			<base_include type="file">usr/sbin/mount</base_include>
-			<base_include type="file">usr/sbin/nwamadm</base_include>
-			<base_include type="file">usr/sbin/nwamcfg</base_include>
-			<base_include type="file">usr/sbin/ping</base_include>
-			<base_include type="file">usr/sbin/pmadm</base_include>
-			<base_include type="file">usr/sbin/prtconf</base_include>
-			<base_include type="file">usr/sbin/prtvtoc</base_include>
-			<base_include type="file">usr/sbin/svccfg</base_include>
-			<base_include type="file">usr/sbin/svcadm</base_include>
-			<base_include type="file">usr/sbin/syslogd</base_include>
-			<base_include type="file">usr/share/lib/xml/dtd/service_bundle.dtd.1</base_include>
-			<base_include type="file">usr/lib/fs/hsfs/fstyp</base_include>
-			<base_include type="file">usr/lib/fs/hsfs/fstyp.so.1</base_include>
-			<base_include type="file">usr/lib/fs/hsfs/mount</base_include>
-			<base_include type="file">usr/lib/fs/tmpfs/mount</base_include>
-			<base_include type="file">usr/lib/fs/ufs/fstyp</base_include>
-			<base_include type="file">usr/lib/fs/ufs/fstyp.so.1</base_include>
-			<base_include type="file">usr/lib/fs/ufs/mount</base_include>
-			<base_include type="file">usr/lib/libfstyp.so.1</base_include>
-			<base_include type="file">usr/lib/platexec</base_include>
 			<base_include type="file">usr/lib/devfsadm/linkmod/SUNW_audio_link.so</base_include>
 			<base_include type="file">usr/lib/devfsadm/linkmod/SUNW_cfg_link.so</base_include>
 			<base_include type="file">usr/lib/devfsadm/linkmod/SUNW_disk_link.so</base_include>
@@ -366,32 +344,58 @@
 			<base_include type="file">usr/lib/devfsadm/linkmod/SUNW_usb_link.so</base_include>
 			<base_include type="file">usr/lib/devfsadm/linkmod/SUNW_zfs_link.so</base_include>
 			<base_include type="file">usr/lib/devfsadm/devfsadmd</base_include>
-			<base_include type="file">usr/lib/libm.so</base_include>
-			<base_include type="file">usr/lib/libm.so.2</base_include>
-			<base_include type="file">usr/lib/64/libm.so</base_include>
-			<base_include type="file">usr/lib/64/libm.so.2</base_include>
-			<base_include type="file">usr/lib/libfstyp.so</base_include>
-			<base_include type="file">usr/lib/libz.so</base_include>
-			<base_include type="file">usr/lib/libz.so.1</base_include>
+			<base_include type="file">usr/lib/fs/hsfs/fstyp</base_include>
+			<base_include type="file">usr/lib/fs/hsfs/fstyp.so.1</base_include>
+			<base_include type="file">usr/lib/fs/hsfs/mount</base_include>
+			<base_include type="file">usr/lib/fs/tmpfs/mount</base_include>
+			<base_include type="file">usr/lib/fs/ufs/fstyp</base_include>
+			<base_include type="file">usr/lib/fs/ufs/fstyp.so.1</base_include>
+			<base_include type="file">usr/lib/fs/ufs/mount</base_include>
 			<base_include type="file">usr/lib/isaexec</base_include>
 			<base_include type="file">usr/lib/libast.so.1</base_include>
 			<base_include type="file">usr/lib/64/libast.so.1</base_include>
 			<base_include type="file">usr/lib/libcmd.so.1</base_include>
 			<base_include type="file">usr/lib/64/libcmd.so.1</base_include>
+			<base_include type="file">usr/lib/libcrypt.so.1</base_include>
 			<base_include type="file">usr/lib/libdll.so.1</base_include>
 			<base_include type="file">usr/lib/64/libdll.so.1</base_include>
+			<base_include type="file">usr/lib/libfstyp.so</base_include>
+			<base_include type="file">usr/lib/libfstyp.so.1</base_include>
+			<base_include type="file">usr/lib/libm.so</base_include>
+			<base_include type="file">usr/lib/libm.so.2</base_include>
+			<base_include type="file">usr/lib/64/libm.so</base_include>
+			<base_include type="file">usr/lib/64/libm.so.2</base_include>
+			<base_include type="file">usr/lib/libmapmalloc.so.1</base_include>
 			<base_include type="file">usr/lib/libshell.so.1</base_include>
 			<base_include type="file">usr/lib/64/libshell.so.1</base_include>
-			<base_include type="file">usr/lib/libcrypt.so.1</base_include>
-			<base_include type="file">usr/lib/libmapmalloc.so.1</base_include>
+			<base_include type="file">usr/lib/libz.so</base_include>
+			<base_include type="file">usr/lib/libz.so.1</base_include>
+			<base_include type="file">usr/lib/platexec</base_include>
+			<base_include type="file">usr/sbin/chroot</base_include>
+			<base_include type="file">usr/sbin/devfsadm</base_include>
+			<base_include type="file">usr/sbin/df</base_include>
+			<base_include type="file">usr/sbin/format</base_include>
+			<base_include type="file">usr/sbin/hostconfig</base_include>
+			<base_include type="file">usr/sbin/lofiadm</base_include>
+			<base_include type="file">usr/sbin/modload</base_include>
+			<base_include type="file">usr/sbin/mount</base_include>
+			<base_include type="file">usr/sbin/nwamadm</base_include>
+			<base_include type="file">usr/sbin/nwamcfg</base_include>
+			<base_include type="file">usr/sbin/ping</base_include>
+			<base_include type="file">usr/sbin/pmadm</base_include>
+			<base_include type="file">usr/sbin/prtconf</base_include>
+			<base_include type="file">usr/sbin/prtvtoc</base_include>
+			<base_include type="file">usr/sbin/svcadm</base_include>
+			<base_include type="file">usr/sbin/svccfg</base_include>
+			<base_include type="file">usr/sbin/syslogd</base_include>
 			<base_include type="file">usr/share/lib/xml/dtd/service_bundle.dtd.1</base_include>
-			<base_include type="file">var/sadm/install/admin/default</base_include>
-			<base_include type="file">var/sadm/install/contents</base_include>
 			<base_include type="file">var/adm/utmpx</base_include>
 			<base_include type="file">var/adm/wtmpx</base_include>
 			<base_include type="file">var/adm/aculog</base_include>
 			<base_include type="file">var/log/authlog</base_include>
 			<base_include type="file">var/log/syslog</base_include>
+			<base_include type="file">var/sadm/install/admin/default</base_include>
+			<base_include type="file">var/sadm/install/contents</base_include>
 			<base_include type="file">var/saf/zsmon/log</base_include>
 			<base_include type="file">var/spool/cron/crontabs/adm</base_include>
 			<base_include type="file">var/spool/cron/crontabs/root</base_include>
@@ -510,8 +514,6 @@
 			<base_include type="file">lib/libc.so.1</base_include>
 			<base_include type="file">lib/64/libc.so.1</base_include>
 			<base_include type="file">lib/libpthread.so.1</base_include>
-			<base_include type="file">lib/libm.so.2</base_include>
-			<base_include type="file">lib/64/libm.so.2</base_include>
 			<base_include type="file">lib/libnsl.so.1</base_include>
 			<base_include type="file">lib/64/libnsl.so.1</base_include>
 			<base_include type="file">lib/libgen.so.1</base_include>

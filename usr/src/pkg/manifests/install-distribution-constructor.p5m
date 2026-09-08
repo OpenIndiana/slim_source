@@ -68,6 +68,7 @@ dir  path=usr/share/distro_const
 file path=usr/share/distro_const/DC-manifest.defval.xml group=sys mode=0444
 file path=usr/share/distro_const/DC-manifest.rng group=sys mode=0444
 file path=usr/share/distro_const/boot_archive_archive.py mode=0555
+file path=usr/share/distro_const/boot_archive_compress_usr mode=0555
 file path=usr/share/distro_const/boot_archive_configure mode=0555
 file path=usr/share/distro_const/boot_archive_initialize.py mode=0555
 file path=usr/share/distro_const/create_iso mode=0555

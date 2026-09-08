@@ -38,7 +38,7 @@ DC_LOADER_FILES=	loader.rc.local menu.rc.local
 # Note: PYCMODULES are not delivered.
 # They are only compiled for error checking purposes.
 ROOTDC_LOADER=	$(ROOTDC)/loader
-ROOTDC_LOADER_FILES=	$(DC_LOADER_FILES:%=$(ROOTDC)/loader/%)
+ROOTDC_LOADER_FILES=	$(DC_LOADER_FILES:%=$(ROOTDC_LOADER)/%)
 
 all:
 clean:

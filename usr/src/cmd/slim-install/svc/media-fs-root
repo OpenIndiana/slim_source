@@ -43,14 +43,30 @@ TEXTINSTALL=0
 [ -f /.autoinstall ] && AUTOINSTALL=1
 [ -f /.textinstall ] && TEXTINSTALL=1
 
+#
+# Set up the terminal correctly for prompting
+#
+CPU=`/sbin/uname -p` 
+if [ "$CPU" = i386 ] && [ $LIVECD = 1 ]; then
+    TERM=sun-color
+elif [ "$CPU" = sparc ] && [ $LIVECD = 1 ]; then
+    TERM=sun
+else
+    TERM=xterm
+fi
+export TERM
+if [ "$TERM" = xterm ] && [ -x /sbin/resize ]; then
+    /sbin/resize
+fi
+
 PRTCONF=/usr/sbin/prtconf
 SED=/usr/bin/sed
 CUT=/usr/bin/cut
 MOUNT=/sbin/mount
 
 # compressed archives
-SOLARIS_ZLIB="solaris.zlib"
-SOLARISMISC_ZLIB="solarismisc.zlib"
+SOLARIS_ZLIB="/.cdrom/solaris.zlib"
+SOLARISMISC_ZLIB="/.cdrom/solarismisc.zlib"
 
 . /lib/svc/share/live_fs_include.sh
 . /lib/svc/share/smf_include.sh
@@ -59,11 +75,11 @@ SOLARISMISC_ZLIB="solarismisc.zlib"
 volsetid=$( < "/.volsetid" )
 
 if [ $LIVECD = 1 ]; then
-	echo "\rPreparing live image for use" >/dev/msglog
+    echo "\rPreparing live image for use" >/dev/msglog
 elif [ $AUTOINSTALL = 1 ]; then
-	echo "\rPreparing automated install image for use" >/dev/msglog
+    echo "\rPreparing automated install image for use" >/dev/msglog
 elif [ $TEXTINSTALL = 1 ]; then
-	echo "\rPreparing text install image for use" >/dev/msglog
+    echo "\rPreparing text install image for use" >/dev/msglog
 fi
 
 # Determine if any of the USB devices contains a UFS/HSFS filesystem.
@@ -74,132 +90,166 @@ OPTIONS="ro,nologging,noatime"
 
 /sbin/listusb | while read dev rdev
 do
-	FSTYP=$(/usr/lib/fs/hsfs/fstyp $rdev 2>/dev/null)
-	if [ X$FSTYP != "Xhsfs" ]; then
-		FSTYP=$(/usr/lib/fs/ufs/fstyp $rdev 2>/dev/null)
-	fi
-	if [ $? -eq 0 ]; then
-		$MOUNT -F $FSTYP -o $OPTIONS $dev /.cdrom || break
-		if [[ "$volsetid" != "$( < "/.cdrom/.volsetid" )" ]]; then
-			/sbin/umount -f $dev
-			continue
-		fi
-		if [ -f /.cdrom/$SOLARIS_ZLIB ]; then
-			echo "" > /.liveusb
-			break
-		else
-			/sbin/umount -f $dev
-			continue
-		fi
+    FSTYP=$(/usr/lib/fs/hsfs/fstyp $rdev 2>/dev/null)
+    if [ X$FSTYP != "Xhsfs" ]; then
+	FSTYP=$(/usr/lib/fs/ufs/fstyp $rdev 2>/dev/null)
+    fi
+    if [ $? -eq 0 ]; then
+	$MOUNT -F $FSTYP -o $OPTIONS $dev /.cdrom || break
+	[ -f /.cdrom/.volsetid ] && cdvolsetid=$( < "/.cdrom/.volsetid" )
+	if [ "$volsetid" != "$cdvolsetid" ]; then
+	    /sbin/umount -f $dev
+	    continue
+	    fi
+	    if [ -f $SOLARIS_ZLIB ]; then
+		echo "" > /.liveusb
+		break
+	    else
+		/sbin/umount -f $dev
+		continue
+	    fi
 	fi
 done
 
 # ..Else look for CD
 [ ! -f /.liveusb ] && /sbin/listcd | while read dev rdev
 do
-	# 
-	# For systems that might have multiple CD drives,
-	# make sure that the filesystem gets mounted off of
-	# the same CD drive as the one we're booting from.
-	# 
-	/usr/lib/fs/hsfs/fstyp -v $rdev 2>&1 | \
-	    grep "Volume set id: $volsetid" > /dev/null
-	if [ $? -eq 0 ]; then
-		$MOUNT -F hsfs -o ro $dev /.cdrom || break
-	fi
+    # 
+    # For systems that might have multiple CD drives,
+    # make sure that the filesystem gets mounted off of
+    # the same CD drive as the one we're booting from.
+    # 
+    /usr/lib/fs/hsfs/fstyp -v $rdev 2>&1 | \
+	grep "Volume set id: $volsetid" > /dev/null
+    if [ $? -eq 0 ]; then
+	$MOUNT -F hsfs -o ro $dev /.cdrom || break
+    fi
 done
 
-# ... else try network (NFS)
-if ! $MOUNT | grep -q "^/.cdrom" ; then
-	# Wait up to 60 seconds until network is up
-	RETRIES=0
-	until
-		ROOTPATH=$(/sbin/dhcpinfo Rootpath)
-	do
-		RETRIES=$((RETRIES + 1))
-		((RETRIES > 10)) && break
-		sleep 6
-	done
-	# Get scheme
-	SCHEME=${ROOTPATH%%://*}
-	[ "$SCHEME" = "$ROOTPATH" ] && SCHEME=
-	# Handle nfs://<ip-address>/<path> form
-	if [ "$SCHEME" = "nfs" ] ; then
-		ROOTPATH=${ROOTPATH#nfs://}
-		IPADDRESS=${ROOTPATH%%/*}
-		ROOTPATH=${ROOTPATH#$IPADDRESS}
+# ... else try network (NFS), only if /solaris.zlib isn't allready there.
+if [ ! -f /solaris.zlib -a ! -f /.liveusb -a `$MOUNT | grep -c "^/.cdrom"` -eq "0" ]; then
+    # Wait up to 60 seconds until network is up
+    RETRIES=0
+    until
+	ROOTPATH=$(/sbin/dhcpinfo Rootpath)
+    do
+	RETRIES=$((RETRIES + 1))
+	((RETRIES > 10)) && break
+	sleep 6
+    done
+    # Get scheme
+    SCHEME=${ROOTPATH%%://*}
+    [ "$SCHEME" = "$ROOTPATH" ] && SCHEME=
+    # Handle nfs://<ip-address>/<path> form
+    if [ "$SCHEME" = "nfs" ] ; then
+	ROOTPATH=${ROOTPATH#nfs://}
+	IPADDRESS=${ROOTPATH%%/*}
+	ROOTPATH=${ROOTPATH#$IPADDRESS}
+    fi
+    # Handle <ip-address>:/<path> form
+    if [ -z "$SCHEME" -a "${ROOTPATH/:}" != "$ROOTPATH" ] ; then
+	SCHEME="nfs"
+	IPADDRESS=${ROOTPATH%%:*}
+	ROOTPATH=${ROOTPATH#$IPADDRESS:}
+    fi
+    # Try to mount
+    if [ "$SCHEME" = "nfs" -a "$IPADDRESS" -a "$ROOTPATH" ] ; then
+	# Force NFSv3 to get proper file ownership even without
+	# the nfs/mapid service
+	if $MOUNT -o vers=3 $IPADDRESS:${ROOTPATH}/${CPU} "/.cdrom" ; then
+	    if [ "$volsetid" != "$(<"/.cdrom/.volsetid")" ] ; then
+		/sbin/umount -f /.cdrom
+	    else
+		echo "Mounting install image using NFS" >/dev/msglog
+	    fi
 	fi
-	# Handle <ip-address>:/<path> form
-	if [ -z "$SCHEME" -a "${ROOTPATH/:}" != "$ROOTPATH" ] ; then
-		SCHEME="nfs"
-		IPADDRESS=${ROOTPATH%%:*}
-		ROOTPATH=${ROOTPATH#$IPADDRESS:}
-	fi
-	# Try to mount
-	if [ "$SCHEME" = "nfs" -a "$IPADDRESS" -a "$ROOTPATH" ] ; then
-		# Force NFSv3 to get proper file ownership even without
-		# the nfs/mapid service
-		if $MOUNT -o vers=3 $IPADDRESS:$ROOTPATH "/.cdrom" ; then
-			if [ "$volsetid" != "$(<"/.cdrom/.volsetid")" ] ; then
-				/sbin/umount -f /.cdrom
-			fi
-		fi
-	fi
+    fi
 fi
 
-# Check if mount of /.cdrom failed.
-$MOUNT | grep "^/.cdrom"
-if [ $? -ne 0 ]; then
-	echo "** FATAL **: Unable to access media"
-	exit $SMF_EXIT_ERR_FATAL
+# copy the compressed zlibs to /tmp for single device illumos stream install.
+if [ ! -f /.cdrom/solaris.zlib ]; then
+    echo "Using tmpfs filesystem for installation" >/dev/msglog
+    SOLARIS_ZLIB="/tmp/solaris.zlib"
+    SOLARISMISC_ZLIB="/tmp/solarismisc.zlib"
+    $MOUNT /tmp
+    cp /solaris.zlib /tmp
+    cp /solarismisc.zlib /tmp
 fi
 
 # Explictly create lofi devices for solaris.zlib and 
 # solarismisc.zlib
-
-
 #
 # Can not mount solaris.zlib using just the mount command,
 # because the mount command enforces nosetuid, and /usr
 # needs to have the setuid capability.
-#
 #
 # Must use lofiadm in combination with the mount command,
 # as with the changes to make lofi work from within a zone,
 # a properly populated /dev tree is required to use simply
 # "mount" - this applies to both .zlib files.
 #
-usr_lofi_dev=$(/usr/sbin/lofiadm -a /.cdrom/$SOLARIS_ZLIB)
+usr_lofi_dev=$(/usr/sbin/lofiadm -a $SOLARIS_ZLIB)
 if [ $? -ne 0 -o -z "$usr_lofi_dev" ]; then
-	echo "lofiadm of /usr FAILED!" 
-	exit $SMF_EXIT_ERR_FATAL
+    echo "lofiadm of /usr FAILED!" >/dev/msglog
+    exit $SMF_EXIT_ERR_FATAL
 fi
 $MOUNT -F hsfs -o ro ${usr_lofi_dev} /usr
 if [ $? -ne 0 ]; then
-	echo "/usr MOUNT FAILED!" 
-	exit $SMF_EXIT_ERR_FATAL
+    echo "/usr MOUNT FAILED!" >/dev/msglog
+    exit $SMF_EXIT_ERR_FATAL
 fi
 
-
-misc_lofi_dev=$(/usr/sbin/lofiadm -a /.cdrom/$SOLARISMISC_ZLIB)
+misc_lofi_dev=$(/usr/sbin/lofiadm -a $SOLARISMISC_ZLIB)
 if [ $? -ne 0 -o -z "$misc_lofi_dev" ]; then
-	echo "lofiadm of /mnt/misc FAILED!"
-	exit $SMF_EXIT_ERR_FATAL
+    echo "lofiadm of /mnt/misc FAILED!" >/dev/msglog
+    exit $SMF_EXIT_ERR_FATAL
 fi
 
 $MOUNT -F hsfs -o ro ${misc_lofi_dev} /mnt/misc
 if [ $? -ne 0 ]; then
-	echo "/mnt/misc MOUNT FAILED!"
+    echo "/mnt/misc MOUNT FAILED!" >/dev/msglog
+    exit $SMF_EXIT_ERR_FATAL
+fi
+
+# Check if mount of /.cdrom failed.
+if [ ! /.usr.tar.xz ]; then
+    $MOUNT | grep "^/.cdrom"
+    if [ $? -ne 0 ]; then
+	echo "** FATAL **: Unable to access media" >/dev/msglog
 	exit $SMF_EXIT_ERR_FATAL
+    fi
 fi
 
 if [ $LIVECD = 1 ]; then
-	echo "Done mounting Live image" > /dev/msglog
+    echo "Done mounting Live image" >/dev/msglog
 elif [ $AUTOINSTALL = 1 ]; then
-	echo "Done mounting automated install image" > /dev/msglog
+    echo "Done mounting automated install image" >/dev/msglog
 elif [ $TEXTINSTALL = 1 ]; then
-	echo "Done mounting text install image" > /dev/msglog
+    echo "Done mounting text install image" >/dev/msglog
 fi
+
+# now after the lofi filesystems are active, get rid of
+# the ones in the current root filesystem.
+if [ -f /.usr.tar.xz ]; then
+    rm -f /solaris.zlib
+    rm -f /solarismisc.zlib
+    if [ -f /.cdrom/solaris.zlib ]; then
+	rm /tmp/solarismisc.zlib
+	rm /tmp/solaris.zlib
+    fi
+fi
+
+#
+# This fixes SMF service: svc:/network/location:default
+# Note:
+# It is NOT advisable to change text_live.xml to have svc:/network/physical:default
+# active in the first place, because you'll end up with none IF plumbed to mount
+# install medium using NFS and every attempt to install using the network will fail.
+#
+/usr/sbin/svcadm disable svc:/network/physical:nwam
+/usr/bin/sleep 2
+/usr/sbin/svcadm enable svc:/network/physical:default
+/usr/bin/sleep 2
 
 #
 # Also mount /boot now so that things like keymap.sh can access
@@ -212,7 +262,7 @@ fi
 readvfstab "/boot" < $vfstab
 
 if [ -n "$mountp" ]; then
-	mountfs - /boot $fstype $mntopts - || exit $SMF_EXIT_ERR_FATAL
+    mountfs - /boot $fstype $mntopts - || exit $SMF_EXIT_ERR_FATAL
 fi
 
 #
@@ -227,24 +277,6 @@ fi
 # Set up the optimized libc mounts
 #
 libc_mount
-
-# 
-# Discover architecture and find and mount optimal libc_psr 
-#  
-ARCH=`/usr/bin/uname -m` 
-PLAT=`/usr/bin/uname -i` 
-if [ "$ARCH" = "sun4v" ]; then 
-	sun4v_libc_psr_mount 
-elif [ "$ARCH" = "sun4u" ]; then 
-	if [ -h /platform/$PLAT/lib/libc_psr.so.1 ]; then 
-		LINKSTO=`/usr/bin/ls -l /platform/$PLAT/lib/libc_psr.so.1 | 
-			/usr/bin/awk '{print $NF}'` 
-		if [ "$LINKSTO" = "../../sun4u-us3/lib/libc_psr.so.1" ]; then 
-			ARCH=sun4u-us3 
-		fi
-	fi
-	sun4u_libc_psr_mount 
-fi
 
 #
 # All SMF services are imported and sevice profiles are applied to the
@@ -276,67 +308,74 @@ assistive_tech=`$PRTCONF -v | \
 livessh=`$PRTCONF -v|$SED -n '/livessh/{;n;p;}'|$CUT -f 2 -d\'`
 
 if [ $AUTOINSTALL = 1 ]; then
-	# Apply the appropriate nwam profile
-	/usr/sbin/svccfg apply /etc/svc/profile/network_nwam.xml
+    # Apply the appropriate nwam profile
+    /usr/sbin/svccfg apply /etc/svc/profile/network_nwam.xml
 
-	# If requested, enable remote access via ssh
-	if [ "$livessh" = "enable" ]; then
-		# generate ssh keys
-		/lib/svc/method/sshd -c
-		# enable ssh server
-		/usr/sbin/svcadm enable network/ssh
-	fi
+    # If requested, enable remote access via ssh
+    if [ "$livessh" = "enable" ]; then
+	# generate ssh keys
+	/lib/svc/method/sshd -c
+	# enable ssh server
+	/usr/sbin/svcadm enable network/ssh
+    fi
 elif [ $LIVECD = 1 ]; then
-	#
-	# Set up the terminal correctly for prompting
-	#
-	TERM=sun-color
-	export TERM
+    #
+    # if requested via GRUB menu selection:
+    #     enable ssh
+    #     set keyboard layout to default of English
+    #     set desktop language to default of English
+    # else
+    #     Ask user to configure Keyboard Layout and Desktop Language
+    #
+    if [ "$livessh" = "enable" ]; then
+	/usr/sbin/set_lang default
+	/usr/bin/kbd -s US-English
+	/usr/sbin/svcadm enable network/ssh
+    else
+	/usr/bin/kbd -s US-English
 
 	#
-	# if requested via GRUB menu selection:
-	#     enable ssh
-	#     set keyboard layout to default of English
-	#     set desktop language to default of English
-	# else
-	#     Ask user to configure Keyboard Layout and Desktop Language
+	# Ask user to configure Language
 	#
-	if [ "$livessh" = "enable" ]; then
-		/usr/sbin/set_lang default
-		/usr/bin/kbd -s US-English
-		/usr/sbin/svcadm enable network/ssh
-	else
-		/usr/bin/kbd -s US-English
-
-		#
-		# Ask user to configure Language
-		#
-		if [ "x$assistive_tech" != "x" ] ; then
-			printf "\\a"
-		fi
-		/usr/sbin/set_lang </dev/console >/dev/console 2>&1
+	if [ "x$assistive_tech" != "x" ] ; then
+	    printf "\\a"
 	fi
+	/usr/sbin/set_lang </dev/console >/dev/console 2>&1
+    fi
 
-	# /usr/bin/setup.sh
-	livemode=`$PRTCONF -v|$SED -n '/livemode/{;n;p;}'|$CUT -f 2 -d\'`
-	if [ "$livemode" = "text" ]; then
-		/usr/sbin/svcadm disable -t application/graphical-login/gdm
-		/usr/sbin/svcadm disable -t application/graphical-login/lightdm
-	else
-		[ "$livemode" = "vesa" ] && cp /.cdrom/jack/xorg.conf.vesa /etc/X11/xorg.conf
-		if [ -f /usr/sbin/lightdm ]; then
-			[ -f /usr/sbin/gdm ] && /usr/sbin/svcadm disable application/graphical-login/gdm
-			/usr/sbin/svcadm enable application/graphical-login/lightdm
-		else 
-			/usr/sbin/svcadm enable application/graphical-login/gdm
-		fi
+    # /usr/bin/setup.sh
+    livemode=`$PRTCONF -v|$SED -n '/livemode/{;n;p;}'|$CUT -f 2 -d\'`
+    if [ "$livemode" = "text" ]; then
+	/usr/sbin/svcadm disable -t application/graphical-login/gdm
+	/usr/sbin/svcadm disable -t application/graphical-login/lightdm
+    else
+	[ "$livemode" = "vesa" ] && cp /.cdrom/jack/xorg.conf.vesa /etc/X11/xorg.conf
+	if [ -f /usr/sbin/lightdm ]; then
+	    [ -f /usr/sbin/gdm ] && /usr/sbin/svcadm disable application/graphical-login/gdm
+	    /usr/sbin/svcadm enable application/graphical-login/lightdm
+	else 
+	    /usr/sbin/svcadm enable application/graphical-login/gdm
 	fi
+    fi
 
 elif [ $TEXTINSTALL = 1 ]
 then
-	# Get keyboard layout from user.
-	/usr/bin/kbd -s </dev/console >/dev/console 2>&1
+    # Check if we have a self identifying keyboard type - usually only on SPARC systems.
+    KBTYP=`/usr/bin/kbd -t`
+    case $KBTYP in
+	Type*) echo "Using: ${KBTYP}." >/dev/msglog
+	;;
+	*) # Get keyboard layout from user.
+	    /usr/bin/kbd -s </dev/console >/dev/console 2>&1
+	;;
+    esac
+    # check if created boot-image has additional languages,
+    # if not then we don't have to ask this question.
+    ALLLANG=`ls /usr/lib/locale | wc -w | awk '{print $1}'`
+    if [ "$ALLLANG" -ge 30 ]; then
 	/usr/sbin/set_lang </dev/console >/dev/console 2>&1
+    fi
+
 fi
 
 exit $SMF_EXIT_OK

@@ -59,7 +59,7 @@
 	<exec_method
 		type='method'
 		name='start'
-		exec='/usr/sbin/text-mode-menu &gt; /dev/console &lt; /dev/console 2&gt;&amp;1'
+		exec='/sbin/text-mode-menu &gt; /dev/console &lt; /dev/console 2&gt;&amp;1'
 		timeout_seconds='0' />
 
 	<exec_method

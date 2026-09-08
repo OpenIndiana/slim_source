@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/usr/bin/ksh
 #
 # CDDL HEADER START
 #
@@ -19,39 +19,20 @@
 #
 # CDDL HEADER END
 #
-# Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2026 Klaus Ziegler. All rights reserved.
 #
 
 # =============================================================================
 # =============================================================================
-# post_boot_archive_pkg_image_mod
-#
-# Customizations to the package image area after boot archive construction completes
+# sparc_usb_confiure - Configure a populated boot archive area including usr
+#			and misc filesystems into a usable boot archive.
 # =============================================================================
 # =============================================================================
-
-builtin cd
-builtin cp
-builtin cut
-builtin mkdir
-builtin mv
-builtin rm
-
-# Define a few commands.
-ECHO=/usr/bin/echo
-LOFIADM=/usr/sbin/lofiadm
-MKISOFS=/usr/bin/mkisofs
-TIME=/usr/bin/time
-GREP=/usr/bin/grep
-
-# Define non-core-OS commands.
-MANIFEST_READ=/usr/bin/ManifestRead
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Main
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Customizations to the package image area after boot archive construction
-# completes.
+# Configure a populated boot archive area into a usable boot archive, less archiving.
 # 
 # Args:
 #   MFEST_SOCKET: Socket needed to get manifest data via ManifestRead object
@@ -60,28 +41,25 @@ MANIFEST_READ=/usr/bin/ManifestRead
 #
 #   TMP_DIR: Temporary directory to contain the boot archive file
 #
-#   BA_BUILD: Area where boot archive is put together
+#   BA_BUILD: Area where boot archive is put together.
 #
 #   MEDIA_DIR: Area where the media is put. (Not used)
-# 
-#   USER_ZLIB_KEY=USER_ZLIB_ALG: The compression algorithm used for the usr.zlib.
-#		USER_ZLIB_KEY is required to be the string "usr_zlib_compression"
-#		USER_ZLIB_ALG is an algorithm that's accepted by the lofiadm command.
 #
-# Note: This assumes a populated pkg_image area exists at the location
-#		${PKG_IMG_PATH} and that the boot archive has been built.
+# Note: This assumes a populated boot archive area exists at $BA_BUILD.
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-if [ "$#" != "6" ] ; then
-	print -u2 -f "Usage: %s: Requires 6 args:\n" "$0"
-	print -u2 "    Reader socket, pkg_image area, tmp_dir,"
-	print -u2 "    boot archive build area, media area, usr zlib compression algorithm"
+# Verify argument count
+if [ $# != 5 ] ; then
+	print -u2 -f "%s: Requires 5 args: Reader socket, pkg_image area,\n" \
+	    "$0"
+	print -u2 "    tmp dir, boot archive build area, media area,"
+	print -u2 "    img_type_file."
 	exit 1
 fi
 
-MFEST_SOCK=$1
-
+# Get commandline args.  First 5 are passed to all finalizer scripts.
+MFEST_SOCKET=$1
 PKG_IMG_PATH=$2
 if [ ! -d $PKG_IMG_PATH ] ; then
 	print -u2 -f "%s: Image package area %s is not valid\n" \
@@ -96,59 +74,143 @@ if [ ! -d $TMP_DIR ] ; then
 fi
 
 BA_BUILD=$4
-if [ ! -d ${BA_BUILD} ] ; then
-	print -u2 -f "%s: Boot archive build area %s is not valid\n" \
-	    "$0" "$BA_BUILD"
+if [ ! -d $BA_BUILD ] ; then
+	print -u2 -f "%s: Boot archive build area is not valid\n" "$0"
 	exit 1
 fi
 
-if [  -f ${BA_BUILD}/.usr.tar.xz ] ; then
-	rm -rf ${PKG_IMG_PATH}/usr
-	exit 0
-fi
+builtin cd
+builtin rm
+builtin mkdir
+builtin mv
 
-# Copying volsetid to live CD root		
-cp ${BA_BUILD}/.volsetid ${PKG_IMG_PATH}
+# Define a few commands.
+CHGRP=/usr/bin/chgrp
+CHOWN=/usr/bin/chown
+GREP=/usr/bin/grep
+LOFIADM=/usr/sbin/lofiadm
+MKISOFS=/usr/bin/mkisofs
+TIME=/usr/bin/time
 
-USER_ZLIB_KEY=$($ECHO $6 | cut -s -d'=' -f1)
-if [ "XX${USER_ZLIB_KEY}" != "XXusr_zlib_compression" ] ; then
-	print -u2 "Key to specify usr zlib compression algorithm is not valid."
-	exit 1
-fi
-
-USER_ZLIB_ALG=$($ECHO $6 | cut -s -d'=' -f2)
-#
-# Just make sure the algorithm is not an empty string.  We will not
-# check to make sure whether it is a valid algorithm or not here.
-# This way, we can accomodate any algorithm in the future.
-# If the algorithm is not valid, the error will be reported when
-# it is actually being used by lofiadm
-#
-if [ "XX${USER_ZLIB_ALG}" = "XX" ] ; then
-	print -u2 "Algorithm for usr zlib compression is not specified."
-	exit 1
-fi
-
-COMPRESSION_TYPE=$($MANIFEST_READ $MFEST_SOCK \
-    "img_params/live_img_compression/type")
-if [ "XX${COMPRESSION_TYPE}" = "XX" ] ; then
-	COMPRESSION_TYPE="gzip"
-fi
+# Define non-core-OS commands.
+MANIFEST_READ=/usr/bin/ManifestRead
 
 # Note that DIST_ISO_SORT may or may not exist, given the type of image.
-DIST_ISO_SORT=$($MANIFEST_READ -k $MFEST_SOCK "iso_sort")
-
-# Remove password lock file left around from user actions during
-# package installation; if left in place it becomes a symlink
-# into /mnt/misc which will cause the installer's attempt to
-# create a user account to fail
-rm -f ${PKG_IMG_PATH}/etc/.pwd.lock
+DIST_ISO_SORT=$($MANIFEST_READ -k $MFEST_SOCKET "iso_sort")
 
 if [ ! -d $PKG_IMG_PATH ] ; then
 	print -u2 -f "%s: Image package area %s is not valid\n" \
 	    "$0" "$PKG_IMG_PATH"
 	exit 1
 fi
+
+cd $PKG_IMG_PATH
+
+# check package dependencies for perl, a combined / and /usr image
+# with two perl version, will simply be to big to be booted.
+NUMVERS=`(cd usr/perl5; ls -1 | sed \
+	-e "/bin/d" \
+	-e "/man/d" \
+	-e "/pod/d" \
+	-e "/site_perl/d" \
+	-e "/vendor_perl/d" | wc -l | awk '{print $1}')`
+
+if [ "$NUMVERS" -ne 1 ]; then
+	PVERS=`(cd usr/perl5; ls -1 | sed \
+		-e "/bin/d" \
+		-e "/man/d" \
+		-e "/pod/d" \
+		-e "/site_perl/d" \
+		-e "/vendor_perl/d")`
+	print -u2 -f "%s: \nImage package area: %s\ncontains more than one Perl-Version:\n%s\n" \
+	    "$0" "$PKG_IMG_PATH" "$PVERS"
+	# try to find out which packages depend on the older version.
+	cd ${PKG_IMG_PATH}/var/pkg/publisher/openindiana.org/pkg
+        rm -rf library%2Fperl-5%2F*
+	cd ${PKG_IMG_PATH}/usr/perl5
+	for VERS in `ls -1 | sed \
+		-e "/bin/d" \
+		-e "/man/d" \
+		-e "/pod/d" \
+		-e "/site_perl/d" \
+		-e "/vendor_perl/d" \
+		-e "s@\.@@g" | sed '$d'`
+	do
+		cd ${PKG_IMG_PATH}/var/pkg/publisher/openindiana.org/pkg
+		rm -rf runtime%2Fperl-${VERS} consolidation%2Fuserland%2Fuserland-incorporation
+		print -u2 -f "Dependencies for: runtime/perl-%s need to be fixed.\n" "$VERS"
+		cd ${PKG_IMG_PATH}/var/pkg/publisher/openindiana.org/pkg
+		find . -type f -exec grep "runtime/perl-${VERS}" {} \; -print
+	done
+	print -u2 "Please check detail-log for list of packages." 
+	cd $PKG_IMG_PATH
+	exit 1
+fi
+
+# sbin, kernel and lib are all in the root archive
+print "Removing sbin, kernel and lib from package image area"
+rm -rf sbin kernel lib tmp/tmp_*
+
+# before we can compress /usr we need to save some essential
+# things needed for the installer.
+cd ${PKG_IMG_PATH}/usr
+# keyboard
+mv share/lib/keytables ..
+# terminal unfortunately both databases are needed.
+mv share/lib/terminfo ..
+# time
+mv share/lib/zoneinfo ..
+# needed to intialize SMF
+mv share/lib/xml ..
+# hal SMF services needs dbus
+mv share/dbus-1 ..
+# prtconf needs share/hwdata/pci.ids
+mv share/hwdata ..
+
+D2REM="apache2 apr apr-util ddu demo dict games has kvm mail man net"
+D2REM="$D2REM news old openssl/3/share perl5 preserve proc pub sfw"
+D2REM="$D2REM share spool src X11 lib/p7zip lib/iconv gnu/share/info"
+D2REM="$D2REM gnu/share/locale gnu/share/man gnu/share/tabset"
+
+for d in $D2REM
+do
+	[ -d $d ] && printf "$d " >> /tmp/boot_archive_compress_usr.$$
+done
+
+# only keep libicuuc.so/libicudata.so in solaris.zlib for zpool/zfs commands.
+cd lib/64
+mv libicuuc.so.* ../../..
+mv libicudata.so.* ../../..
+cd ../..
+echo "lib/64/libicu*" >> /tmp/boot_archive_compress_usr.$$
+
+/usr/bin/gtar cf usr.tar `cat /tmp/boot_archive_compress_usr.$$`
+
+# now clear out usr.
+rm -rf `cat /tmp/boot_archive_compress_usr.$$`
+rm /tmp/boot_archive_compress_usr.$$
+
+print "Compressing usr directories using lzma compression"
+xz -9 usr.tar
+if [ $? -ne 0 ] ; then
+	print -u2 -f "%s: compression of usr directories failed\n" "$0"
+	exit 1	
+fi
+# move compressed /usr into dotfile /.usr.tar.xz
+mv usr.tar.xz ${BA_BUILD}/.usr.tar.xz
+mkdir -p share/lib
+$CHGRP sys share
+$CHGRP sys share/lib
+$CHGRP bin include
+mv ../dbus-1 share
+mv ../hwdata share
+mv ../keytables share/lib
+mv ../terminfo share/lib/terminfo
+mv ../xml share/lib
+mv ../zoneinfo share/lib
+mv ../libicuuc.so.* lib/64
+mv ../libicudata.so.* lib/64
+
 cd $PKG_IMG_PATH
 
 # sbin, kernel and lib are all in the root archive
@@ -161,7 +223,6 @@ if [ ! -d $PKG_IMG_PATH ] ; then
 	    "$0" "$PKG_IMG_PATH"
 	exit 1
 fi
-cd $PKG_IMG_PATH
 
 if [[ "X${DIST_ISO_SORT}" != "X" && -s "${DIST_ISO_SORT}" ]]; then
 	SORT_OPTION="-sort $DIST_ISO_SORT"
@@ -187,6 +248,7 @@ fi
 
 LOFI_OUT_STR=${TMP_DIR}/lofi_out_str.$$
 
+USER_ZLIB_ALG=lzma
 print "Compressing usr filesystem image using compression algorithm: ${USER_ZLIB_ALG}"
 LD_LIBRARY_PATH=${PKG_IMG_PATH}/usr/lib $TIME ${PKG_IMG_PATH}/${LOFIADM} \
     -C ${USER_ZLIB_ALG} ${PKG_IMG_PATH}/solaris.zlib >/dev/null \
@@ -205,6 +267,7 @@ if [ $? -ne 0 ] ; then
 	exit 1	
 fi
 rm $LOFI_OUT_STR
+mv ${PKG_IMG_PATH}/solaris.zlib ${BA_BUILD}
 
 print "Generating misc filesystem image"
 if [ ! -d $PKG_IMG_PATH ] ; then
@@ -226,6 +289,7 @@ if [ "$?" != "0" ] ; then
 fi
 rm -rf miscdirs
 
+COMPRESSION_TYPE=lzma
 print "Compressing misc filesystem image using compression algorithm: ${COMPRESSION_TYPE}"
 LD_LIBRARY_PATH=${PKG_IMG_PATH}/usr/lib $TIME ${PKG_IMG_PATH}${LOFIADM} \
     -C $COMPRESSION_TYPE ${PKG_IMG_PATH}/solarismisc.zlib >/dev/null 2>&1
@@ -233,11 +297,6 @@ if [ "$?" != "0" ] ; then
 	print -u2 -f "%s: compression of solarismisc failed\n" "$0"
 	exit 1	
 fi
-
-#
-# Delay rm of usr because lofiadm is used from usr to compress
-# solaris, pkg, and solarismisc
-#
-rm -rf ${PKG_IMG_PATH}/usr
+mv ${PKG_IMG_PATH}/solarismisc.zlib ${BA_BUILD}
 
 exit 0

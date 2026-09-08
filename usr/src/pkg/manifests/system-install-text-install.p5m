@@ -41,7 +41,7 @@ dir  path=opt/install-test/bin
 file path=opt/install-test/bin/ict_test mode=0555
 dir  path=usr group=sys
 dir  path=usr/bin
-file path=usr/bin/text-install group=sys mode=0555
+file path=sbin/text-install group=sys mode=0555
 dir  path=usr/lib
 dir  path=usr/lib/python$(PYVER)
 dir  path=usr/lib/python$(PYVER)/vendor-packages
@@ -138,7 +138,6 @@ file \
     path=usr/lib/python$(PYVER)/vendor-packages/osol_install/text_install/multi_list_item.py \
     mode=0444
 file \
-    path=usr/lib/python$(PYVER)/vendor-packages/osol_install/text_install/network_nic_configure.py \
     mode=0444
 file \
     path=usr/lib/python$(PYVER)/vendor-packages/osol_install/text_install/network_nic_select.py \
@@ -180,7 +179,7 @@ file \
     path=usr/lib/python$(PYVER)/vendor-packages/osol_install/text_install/zpool_selection.py \
     mode=0444
 dir  path=usr/sbin
-file path=usr/sbin/text-mode-menu mode=0555
+file path=sbin/text-mode-menu mode=0555
 dir  path=usr/share group=sys
 dir  path=usr/share/text-install group=sys
 dir  path=usr/share/text-install/help group=sys
