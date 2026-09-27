@@ -273,6 +273,11 @@
 			-->
 			<pkg name="pkg:/entire"/>
 			<pkg name="pkg:/mate_install"/>
+			<!--
+			    Xorg driver for UEFI GOP framebuffers, autoconfigured
+			    when no specific display driver matches (e.g. VMs).
+			-->
+			<pkg name="pkg:/x11/server/xorg/driver/xorg-video-illumosfb"/>
 			<pkg name="pkg:/system/install/gui-install"/>
 			<pkg name="pkg:/system/install/text-install"/>
 			<pkg name="pkg:/system/install/media/internal"/>
