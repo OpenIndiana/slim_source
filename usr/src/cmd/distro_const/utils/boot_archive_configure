@@ -260,6 +260,28 @@ rm $TMP_DIR/hosts.mod
 # concurrent. Leading to a complex loop.
 $MV ${BA_BUILD}/lib/svc/manifest/network/varpd.xml ${BA_BUILD}/lib
 
+# modify dhcpagent default, to enable NIS/NTP queries in the installer.
+$MV ${BA_BUILD}/etc/default/dhcpagent ${BA_BUILD}/etc/default/dhcpagent.orig
+$SED \
+	-e "s@3,6@3,4,6@g" \
+	-e "s@28,43@28,40,41,42,43@g" \
+	${BA_BUILD}/etc/default/dhcpagent.orig > ${BA_BUILD}/etc/default/dhcpagent
+chgrp sys ${BA_BUILD}/etc/default/dhcpagent
+
+$MV ${BA_BUILD}/lib/svc/method/net-svc ${BA_BUILD}/lib/svc/method/net-svc.orig
+$SED \
+	-e "/NWAM_FMRI/d" ${BA_BUILD}/lib/svc/method/net-svc.orig \
+	> ${BA_BUILD}/lib/svc/method/net-svc
+$MV ${BA_BUILD}/lib/svc/share/smf_include.sh ${BA_BUILD}/lib/svc/share/smf_include.sh.orig
+$SED \
+	-e 's@nfs"@nfs" -o "$1" = "ufs" -a "$3" = "dhcp"@g' ${BA_BUILD}/lib/svc/share/smf_include.sh.orig \
+	> ${BA_BUILD}/lib/svc/share/smf_include.sh
+cp -p /usr/bin/resize ${BA_BUILD}/sbin
+/usr/bin/chown root:bin ${BA_BUILD}/lib/svc/share/smf_include.sh
+/usr/bin/chmod 0444 ${BA_BUILD}/lib/svc/share/smf_include.sh
+/usr/bin/chown root:bin ${BA_BUILD}/lib/svc/method/net-svc
+/usr/bin/chmod 0555 ${BA_BUILD}/lib/svc/method/net-svc
+
 print "Preloading SMF repository..."
 
 $MKREPO $BA_BUILD $PKG_IMG_PATH

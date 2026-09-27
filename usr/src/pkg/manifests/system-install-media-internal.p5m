@@ -56,6 +56,7 @@ file path=jack/Desktop/install_openindiana.desktop owner=jack group=staff \
     mode=0755
 file path=jack/Desktop/text_install_openindiana.desktop owner=jack group=staff \
     mode=0755
+file path=jack/README.multiboot owner=jack group=staff mode=0644
 file path=jack/xorg.conf.vesa owner=jack group=staff
 dir  path=lib
 dir  path=lib/svc

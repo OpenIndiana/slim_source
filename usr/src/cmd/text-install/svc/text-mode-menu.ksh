@@ -21,16 +21,21 @@
 #
 #
 # Copyright (c) 2009, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2026 Klaus Ziegler
 #
 
 LANGUAGE_FILE=/etc/sysconfig/language
+
+# set PATH correctly to find dhcpinfo/ifconfig.
+PATH=/sbin:$PATH
+export PATH
 
 export TEXTDOMAIN="SUNW_INSTALL_TEXT_MENU"
 # LOGNAME variable is needed to display the shell prompt appropriately
 export LOGNAME=`/usr/bin/logname`
 
 # Block all signals which could terminate the menu or return to a parent process
-trap "" TSTP INT TERM ABRT QUIT
+trap "" TSTP TERM ABRT QUIT
 
 # Determine which shell program to use by grabbing this user's login-shell
 # from /etc/passwd
@@ -45,7 +50,7 @@ fi
 # Define the menu of commands and prompts
 menu_items=( \
     (menu_str=`gettext "Install OpenIndiana"`			 \
-	cmds=("/usr/bin/text-install")					 \
+	cmds=("/sbin/text-install")					 \
 	do_subprocess="true"						 \
 	msg_str="")							 \
     (menu_str=`gettext "Install Additional Drivers"`			 \

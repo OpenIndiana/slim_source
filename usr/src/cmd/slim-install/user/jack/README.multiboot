@@ -1,0 +1,180 @@
+
+Filesystem type on dedicated ZFS root pool slice isn't zfs type:
+================================================================
+It is possible that previous installations left over old partition
+signatures or fragments, which prevent a successfull installation.
+None multiboot installations typically show the following VTOC layout:
+
+Part      Tag    Flag     First Sector          Size          Last Sector
+  0     system    wm               256       256.00MB           524543    
+  1        usr    wm            524544       476.68GB           1000198798    
+  2 unassigned    wm                 0            0                0    
+  3 unassigned    wm                 0            0                0    
+  4 unassigned    wm                 0            0                0    
+  5 unassigned    wm                 0            0                0    
+  6 unassigned    wm                 0            0                0    
+  8   reserved    wm        1000198799         8.00MB           1000215182    
+
+During implementation of multiboot setups, it has been discoverd that it
+is possible to create ZFS filesystems on a PCFS filesystem type, but later
+the installboot command fails on the rpool slice, with error message:
+
+Booting pcfs from EFI labeled disks requires the boot partition.
+
+If you should see this message, please re-check filesystem types of the
+first parition slice:
+
+# /usr/sbin/fstyp /dev/rdsk/<your disk>s0
+  it should respond with: unknown_fstyp (no_matches)
+
+Then check the partition slice on which you expect the ZFS root filesystem:
+
+# /usr/sbin/fstyp /dev/rdsk/<your disk>s1
+  it should respond with: zfs
+
+If one or both of these slices respond different, first destroy the ZFS
+rpool, which might already exist:
+# zpool list
+NAME    SIZE  ALLOC   FREE  CKPOINT  EXPANDSZ   FRAG    CAP  DEDUP    HEALTH...
+rpool   476G   540K   476G        -         -     0%     0%  1.00x    ONLINE  -
+
+# zpool destroy rpool
+
+Next step is to clean the signatures of the slice(s) using dd:
+# dd if=/dev/zero of=/dev/rdsk/<your disk>s0 bs=1M count=16
+# dd if=/dev/zero of=/dev/rdsk/<your disk>s1 bs=1M count=16
+
+Last step is to revert the partition table using the format program:
+# format
+or you use a combination of prtvtoc / fmthard:
+# prtvtoc -h /dev/rdsk/<disk>s0 | tail -1 | fmthard -s - /dev/rdsk/<disk>s0
+
+response should be:
+fmthard: New volume table of contents now in place.
+
+After all these steps are done, restart the installer by typing exit in this
+SHELL and start all over by choosing "1" in the top-level menu of the installer
+and continue by choosing your installation disk again.
+Your installation should be working from now on.
+
+=================
+Multiboot Setups:
+=================
+
+SPARC:
+======
+On SPARC systems a multiboot setup is much more simple than on x86 based systems,
+because the boot-manager is already build in. The OBP (Open Boot Prom) provides
+the possibility to boot from arbitrary disks. If you are short on disks you can
+even boot from one of the standard VTOC slices: 0-7 directly from OBP.
+Here are some examples and hints how to boot/install on SPARC systems:
+
+tbn...
+
+x86_64 BIOS/MBR:
+================
+
+currently not supported.
+
+x86_64 EFI/UEFI/GPT:
+====================
+For EFI/UEFI or GPT systems it may be necessary to disable "Secure Boot", in
+your system BIOS, in order to be able to boot from USB/DVD media.
+
+Possible Multiboot Scenarios:
+=============================
+1. illumos + Windows OR illumos + Windows + Linux
+-------------------------------------------------
+If you plan a multiboot setup, involving also a Windows installation on a
+UEFI/GPT system, things are getting more complicated. At present this
+installer detects your Windows installation and checks it's size. If there is
+not enough space available for a illumos installation, it offers you the
+possibility to resize the disk for a new windows installation. At present it's
+not possible to shrink the existing Windows installation. Therefore only a new
+installation of Windows on predefined partition tables ensures a stable
+illumos installation. The predefined partitions for Windows, offered by this
+installer define the following standard Windows sizes:
+
+  1. for EFI as the system partition 100MB.
+  2. a Windows reserved partition 16MB.
+  3. NTFS - the size you'll choose while installing.
+Note: the 100MB system parition will be shared by all operating systems.
+
+During installation the installer asks for:
+Do you want to setup a Multiboot Environment (default=N/y?):
+If you answer "y" the following menu appears:
+
+	1 OpenIndiana + Linux
+	2 OpenIndiana + Windows
+	3 OpenIndiana + Windows + Linux
+	q  back to disk selection
+
+	Your choice: 
+
+If you choose option 2 or 3 the installer asks for the size of your
+Windows partition and creates above partition layout with the size
+you want to spent for Windows. Immediatley after that it reboots
+your system for a new Windws installation, indicated by:
+
+Rebooting for Windows Install...
+
+At the Windows installation screen make sure to select thr NTFS
+partition - usually partition 3 and press the format button
+before installling Windows, leave all other partitions untouched.
+After your new Windows installation has been done, restart this
+installer and choose the same disk as before, now you'll not be
+asked to enable a Multboot Environment. You should see the
+following messages instead:
+
+Welcome back to OpenIndiana installation, the selected Windows
+layout uses: xxxGB
+
+Next step will be to set the size for the illumos installation, and
+or the Linux installation, devide the rest of the disk space between
+them as you see fit.
+
+If you have choosen a config which includes Linux, you see the
+following mesage right at the end of illumos install:
+
+NOTES:
+illumos starts to count partitions starting with 0
+Linux starts to count partitions starting with 1
+If you decide NOT to use a Linux installation with or without Windows,
+you have to use some UEFI firmware/application to boot illumos, which
+can usually be found in your system/UEFI frimware settings.
+
+2. illumos + Linux
+------------------
+If you have choosen option 1 from above menu, you have to decide how much
+disk space you want to spent for illumos, the remainig space will be used
+for Linux. This installer will create a script for you which can be used
+to add the illumos installation into the grub configuration of your
+Linux installation, shown by the following message:
+
+You have to run: /boot/efi/EFI/OpenIndiana/add_grub,
+after the Linux installation has been done, to activate
+OpenIndiana in your grub configuration!
+
+In the Linux installer you will see one partition with the size you have
+specified for Linux. Select this partition in the Linux installer, and
+press the "-" button, now this space should appear as free-space.
+Divide this free space into at least 2 partitions - one for swap and
+one ext4 for / by pressing the "+" sign.
+Make sure you DO NOT TOUCH parition 9 as it marks the start of the
+entire disk and if modified, you'll have to start all over again.
+
+Hardware Notes:
+===============
+1.) ACER Aspire3 laptops (A315-54K):
+The disk-controller "SATA Mode" in the "Information" tab of the system BIOS
+is set to "Optane without RAID" by default. Therefore illumos will not see
+any disk drives. Switch to the next tab "Main" and press <Crtl>+S to hideout
+the "SATA Mode" menu, showing above setting, select this sub-menu and press
+<Return>, choose <AHCI> mode. Exit system BIOS saving your change, and
+re-enter BIOS to verify the "Information" tab shows AHCI mode now, before
+trying to install illumos/OpenIndiana.
+Note: this will definitively render your Windows installation unbootable!
+To fix this, you can have a look at Ubuntu's Web-pages, if you want to keep
+your Windows installation as is. They have excellent help pages to work
+around that problem. I found it much more easier to just re-install Windows
+in AHCI mode for my tests.
